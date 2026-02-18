@@ -5,18 +5,18 @@
 	"type": "module",
 	"license": "SEE LICENSE IN LICENSE",
 	"scripts": {
-		"dev": "next dev --webpack",
-		"dev:webpack": "next dev --webpack",
-		"dev:turbopack": "next dev",
+		"dev": "next dev --webpack -p 8100",
+		"dev:webpack": "next dev --webpack -p 8100",
+		"dev:turbopack": "next dev -p 8100",
 		"build": "next build",
-		"start": "next start",
-		"predev": "pnpm run generate:all",
-		"prebuild": "pnpm run generate:all",
+		"start": "next start -p 8100",
+		"predev": "npm run generate:all",
+		"prebuild": "npm run generate:all",
 		"lint": "eslint",
 		"lint:fix": "eslint --fix",
 		"generate": "graphql-codegen --config .graphqlrc.ts",
 		"generate:checkout": "graphql-codegen --config src/checkout/graphql/codegen.ts",
-		"generate:all": "pnpm run generate && pnpm run generate:checkout",
+		"generate:all": "npm run generate && npm run generate:checkout",
 		"test": "vitest",
 		"test:run": "vitest run",
 		"knip": "knip",
@@ -77,21 +77,15 @@
 		"typescript": "5.3.3",
 		"vitest": "4.0.17"
 	},
-	"resolutions": {
-		"graphql": "16.8.1"
+	"overrides": {
+		"graphql": "16.8.1",
+		"dset": ">=3.1.4",
+		"micromatch": ">=4.0.8",
+		"@babel/runtime": ">=7.26.10",
+		"@babel/helpers": ">=7.26.10",
+		"brace-expansion": ">=2.0.2"
 	},
-	"pnpm": {
-		"overrides": {
-			"dset": ">=3.1.4",
-			"micromatch": ">=4.0.8",
-			"@babel/runtime": ">=7.26.10",
-			"@babel/helpers": ">=7.26.10",
-			"brace-expansion@>=2": ">=2.0.2"
-		}
-	},
-	"packageManager": "pnpm@10.28.1",
 	"engines": {
-		"pnpm": ">=9.4.0",
 		"node": ">=20 <21"
 	}
 }
