@@ -3,8 +3,8 @@ import { Loader } from "@/ui/atoms/loader";
 import { SignUpForm } from "@/ui/components/sign-up-form";
 
 export const metadata = {
-	title: "Create Account",
-	description: "Create a new account to save your addresses and order history.",
+	title: "Crear cuenta",
+	description: "Crea una cuenta para guardar tus direcciones e historial de pedidos.",
 };
 
 export default function SignUpPage() {

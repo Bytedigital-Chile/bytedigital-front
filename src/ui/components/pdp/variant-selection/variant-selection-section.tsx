@@ -193,7 +193,7 @@ export function VariantSelectionSection({
 				// Check if this group is the one with no available options
 				const isUnavailable = unavailableInfo?.slug === group.slug;
 				const unavailableMessage = isUnavailable
-					? `No ${group.name.toLowerCase()} available in ${unavailableInfo.blockedBy}`
+					? `No hay ${group.name.toLowerCase()} disponible en ${unavailableInfo.blockedBy}`
 					: undefined;
 
 				return (

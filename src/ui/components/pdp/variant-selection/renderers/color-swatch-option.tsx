@@ -21,9 +21,9 @@ export function ColorSwatchOption({ option, isSelected, onSelect, isPending }: O
 	// Build accessible label with all relevant info
 	const accessibleLabel = [
 		option.name,
-		isOutOfStock && "out of stock",
-		hasDiscount && `${option.discountPercent}% off`,
-		isSelected && "selected",
+		isOutOfStock && "sin stock",
+		hasDiscount && `${option.discountPercent}% dcto`,
+		isSelected && "seleccionado",
 	]
 		.filter(Boolean)
 		.join(", ");
@@ -52,11 +52,11 @@ export function ColorSwatchOption({ option, isSelected, onSelect, isPending }: O
 				)}
 				title={
 					isOutOfStock
-						? `${option.name} - Out of stock`
+						? `${option.name} - Sin stock`
 						: isIncompatible
-							? `${option.name} - Will change other selections`
+							? `${option.name} - Cambiará otras selecciones`
 							: option.discountPercent
-								? `${option.name} - ${option.discountPercent}% off`
+								? `${option.name} - ${option.discountPercent}% dcto`
 								: option.name
 				}
 				aria-label={accessibleLabel}

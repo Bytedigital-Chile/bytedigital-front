@@ -47,13 +47,13 @@ export const HybridAddressSelector: FC<HybridAddressSelectorProps> = ({
 	selectedAddressId,
 	onSelectAddress,
 	defaultAddressId,
-	emptyMessage = "You don't have any saved addresses yet.",
+	emptyMessage = "Aún no tienes direcciones guardadas.",
 	name = "shippingAddress",
 	addressType = "SHIPPING",
 	onDefaultChange,
 	onAddNew,
 	onEdit,
-	sheetTitle = "Select address",
+	sheetTitle = "Seleccionar dirección",
 }) => {
 	const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -146,7 +146,7 @@ export const HybridAddressSelector: FC<HybridAddressSelectorProps> = ({
 					onClick={() => setSheetOpen(true)}
 					className="border-muted-foreground/50 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-sm text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
 				>
-					Select an address
+					Seleccionar una dirección
 				</button>
 			)}
 
@@ -178,7 +178,7 @@ export const HybridAddressSelector: FC<HybridAddressSelectorProps> = ({
 						className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
 					>
 						{isSettingDefault && <LoadingSpinner />}
-						Set as my default {addressType === "SHIPPING" ? "shipping" : "billing"} address
+						Establecer como mi dirección de {addressType === "SHIPPING" ? "envío" : "facturación"} predeterminada
 					</Label>
 				</div>
 			)}

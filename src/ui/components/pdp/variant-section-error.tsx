@@ -15,14 +15,14 @@ export function VariantSectionError({ resetErrorBoundary }: { resetErrorBoundary
 
 			{/* Error state - order:3 */}
 			<div className="border-destructive/20 bg-destructive/5 order-3 mt-4 rounded-lg border p-6 text-center">
-				<p className="mb-3 text-sm text-muted-foreground">Unable to load product options.</p>
+				<p className="mb-3 text-sm text-muted-foreground">No se pudieron cargar las opciones del producto.</p>
 				{resetErrorBoundary && (
 					<button
 						type="button"
 						onClick={resetErrorBoundary}
 						className="text-sm font-medium text-foreground underline underline-offset-4 hover:no-underline"
 					>
-						Try again
+						Intentar de nuevo
 					</button>
 				)}
 			</div>

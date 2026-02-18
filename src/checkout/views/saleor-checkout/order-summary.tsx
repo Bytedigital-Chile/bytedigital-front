@@ -57,7 +57,7 @@ function extractCheckoutData(checkout: CheckoutFragment): OrderSummaryData {
 		return {
 			id: line.id,
 			quantity: line.quantity,
-			name: line.variant?.product?.name || "Product",
+			name: line.variant?.product?.name || "Producto",
 			attributes,
 			imageUrl: image?.url,
 			imageAlt: image?.alt,
@@ -87,7 +87,7 @@ function extractOrderData(order: OrderFragment): OrderSummaryData {
 		return {
 			id: line.id,
 			quantity: line.quantity,
-			name: line.productName || "Product",
+			name: line.productName || "Producto",
 			attributes,
 			imageUrl: line.thumbnail?.url,
 			imageAlt: line.thumbnail?.alt,
@@ -198,9 +198,9 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 					</div>
 					{/* Text */}
 					<div className="flex flex-col items-start">
-						<span className="text-sm font-medium">{isExpanded ? "Hide" : "Show"} order summary</span>
+						<span className="text-sm font-medium">{isExpanded ? "Ocultar" : "Ver"} resumen del pedido</span>
 						<span className="text-xs text-muted-foreground">
-							{itemCount} {itemCount === 1 ? "item" : "items"}
+							{itemCount} {itemCount === 1 ? "artículo" : "artículos"}
 						</span>
 					</div>
 				</div>
@@ -217,9 +217,9 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 
 			{/* Desktop Header - Only visible on desktop */}
 			<header className="bg-secondary/30 hidden items-center gap-2 px-5 py-4 md:flex">
-				<h2 className="text-base font-semibold">Order Summary</h2>
+				<h2 className="text-base font-semibold">Resumen del pedido</h2>
 				<span className="text-sm text-muted-foreground">
-					({itemCount} {itemCount === 1 ? "item" : "items"})
+					({itemCount} {itemCount === 1 ? "artículo" : "artículos"})
 				</span>
 			</header>
 
@@ -288,7 +288,7 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 								<div className="relative flex-1">
 									<Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 									<Input
-										placeholder="Discount code"
+										placeholder="Código de descuento"
 										value={promoCode}
 										onChange={(e) => setPromoCode(e.target.value)}
 										className="h-10 bg-white pl-10 text-sm"
@@ -301,11 +301,11 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 									disabled={!promoCode || promoApplied}
 									className="h-10 bg-white px-4 text-sm"
 								>
-									{promoApplied ? "Applied" : "Apply"}
+									{promoApplied ? "Aplicado" : "Aplicar"}
 								</Button>
 							</form>
 							{promoApplied && (
-								<p className="mt-2 text-sm font-medium text-green-600">SALEOR10 - 10% discount applied</p>
+								<p className="mt-2 text-sm font-medium text-green-600">SALEOR10 - 10% de descuento aplicado</p>
 							)}
 						</section>
 					)}
@@ -318,20 +318,20 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 								<dd>{formatMoney(subtotal)}</dd>
 							</div>
 							<div className="flex justify-between">
-								<dt className="text-muted-foreground">Shipping</dt>
+								<dt className="text-muted-foreground">Envío</dt>
 								<dd className={cn(shipping === 0 && "text-green-600")}>
-									{shipping === 0 ? "Free" : formatMoney(shipping)}
+									{shipping === 0 ? "Gratis" : formatMoney(shipping)}
 								</dd>
 							</div>
 							{tax > 0 && (
 								<div className="flex justify-between">
-									<dt className="text-muted-foreground">Tax (VAT)</dt>
+									<dt className="text-muted-foreground">Impuestos (IVA)</dt>
 									<dd>{formatMoney(tax)}</dd>
 								</div>
 							)}
 							{discount > 0 && (
 								<div className="flex justify-between text-green-600">
-									<dt>Discount</dt>
+									<dt>Descuento</dt>
 									<dd>-{formatMoney(discount)}</dd>
 								</div>
 							)}
@@ -341,7 +341,7 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 						<div className="border-border/50 mt-4 flex items-baseline justify-between border-t pt-4">
 							<div className="flex flex-col">
 								<span className="text-base font-semibold">Total</span>
-								{tax > 0 && <span className="text-xs text-muted-foreground">Including VAT</span>}
+								{tax > 0 && <span className="text-xs text-muted-foreground">IVA incluido</span>}
 							</div>
 							<data value={total} className="text-xl font-semibold tabular-nums">
 								{formatMoney(total)}
@@ -354,25 +354,25 @@ export const OrderSummary: FC<OrderSummaryProps> = ({ checkout, order, editable 
 						<div className="flex flex-col items-center rounded-lg bg-secondary p-2.5 text-center">
 							<ShieldCheck className="mb-1 h-4 w-4 text-muted-foreground" />
 							<span className="text-[10px] leading-tight text-muted-foreground">
-								Secure
+								Pago
 								<br />
-								checkout
+								seguro
 							</span>
 						</div>
 						<div className="flex flex-col items-center rounded-lg bg-secondary p-2.5 text-center">
 							<RotateCcw className="mb-1 h-4 w-4 text-muted-foreground" />
 							<span className="text-[10px] leading-tight text-muted-foreground">
-								30-day
+								30 días
 								<br />
-								returns
+								de devolución
 							</span>
 						</div>
 						<div className="flex flex-col items-center rounded-lg bg-secondary p-2.5 text-center">
 							<Truck className="mb-1 h-4 w-4 text-muted-foreground" />
 							<span className="text-[10px] leading-tight text-muted-foreground">
-								Free
+								Envío
 								<br />
-								shipping
+								gratis
 							</span>
 						</div>
 					</footer>

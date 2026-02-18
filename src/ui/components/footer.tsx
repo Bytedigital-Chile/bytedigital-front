@@ -10,16 +10,16 @@ import { Logo } from "./shared/logo";
 // Default footer links when no CMS data is available
 const defaultFooterLinks = {
 	support: [
-		{ label: "Contact Us", href: "/contact" },
-		{ label: "FAQs", href: "/faq" },
-		{ label: "Shipping", href: "/shipping" },
-		{ label: "Returns", href: "/returns" },
+		{ label: "Contáctanos", href: "/contact" },
+		{ label: "Preguntas frecuentes", href: "/faq" },
+		{ label: "Envíos", href: "/shipping" },
+		{ label: "Devoluciones", href: "/returns" },
 	],
 	company: [
-		{ label: "About", href: "/about" },
-		{ label: "Sustainability", href: "/sustainability" },
-		{ label: "Careers", href: "/careers" },
-		{ label: "Press", href: "/press" },
+		{ label: "Nosotros", href: "/about" },
+		{ label: "Sustentabilidad", href: "/sustainability" },
+		{ label: "Trabaja con nosotros", href: "/careers" },
+		{ label: "Prensa", href: "/press" },
 	],
 };
 
@@ -72,7 +72,7 @@ export async function Footer({ channel }: { channel: string }) {
 							<Logo className="h-7 w-auto" inverted />
 						</Link>
 						<p className="mt-4 max-w-xs text-sm leading-relaxed text-neutral-400">
-							Minimal design, maximum impact. Thoughtfully crafted essentials for everyday comfort.
+							Diseño minimalista, máximo impacto. Productos esenciales pensados para tu comodidad diaria.
 						</p>
 					</div>
 
@@ -140,7 +140,7 @@ export async function Footer({ channel }: { channel: string }) {
 					{menuItems.length === 0 && (
 						<>
 							<div>
-								<h4 className="mb-4 text-sm font-medium text-neutral-300">Support</h4>
+								<h4 className="mb-4 text-sm font-medium text-neutral-300">Soporte</h4>
 								<ul className="space-y-3">
 									{defaultFooterLinks.support.map((link) => (
 										<li key={link.href}>
@@ -155,7 +155,7 @@ export async function Footer({ channel }: { channel: string }) {
 								</ul>
 							</div>
 							<div>
-								<h4 className="mb-4 text-sm font-medium text-neutral-300">Company</h4>
+								<h4 className="mb-4 text-sm font-medium text-neutral-300">Empresa</h4>
 								<ul className="space-y-3">
 									{defaultFooterLinks.company.map((link) => (
 										<li key={link.href}>
@@ -177,7 +177,7 @@ export async function Footer({ channel }: { channel: string }) {
 				{channels?.channels && (
 					<div className="mt-8 text-neutral-400">
 						<label className="flex items-center gap-2 text-sm">
-							<span>Change currency:</span>
+							<span>Cambiar moneda:</span>
 							<ChannelSelect channels={channels.channels} />
 						</label>
 					</div>
@@ -193,10 +193,10 @@ export async function Footer({ channel }: { channel: string }) {
 							href="/privacy"
 							className="text-xs text-neutral-500 transition-colors hover:text-neutral-300"
 						>
-							Privacy Policy
+							Política de privacidad
 						</Link>
 						<Link href="/terms" className="text-xs text-neutral-500 transition-colors hover:text-neutral-300">
-							Terms of Service
+							Términos de servicio
 						</Link>
 					</div>
 				</div>

@@ -22,11 +22,11 @@ export default function ProductNotFound() {
 				</span>
 
 				{/* Heading */}
-				<h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">Product Not Found</h1>
+				<h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">Producto no encontrado</h1>
 
 				{/* Message */}
 				<p className="mb-8 text-muted-foreground">
-					This product may have been removed, renamed, or is temporarily unavailable.
+					Este producto puede haber sido eliminado, renombrado o no está disponible temporalmente.
 				</p>
 
 				{/* Actions */}
@@ -36,7 +36,7 @@ export default function ProductNotFound() {
 						className={`${buttonBase} hover:bg-primary/90 bg-primary text-primary-foreground`}
 					>
 						<Search className="h-4 w-4" />
-						Browse Products
+						Ver productos
 					</Link>
 
 					<Link
@@ -44,7 +44,7 @@ export default function ProductNotFound() {
 						className={`${buttonBase} border border-input bg-background hover:bg-accent hover:text-accent-foreground`}
 					>
 						<Home className="h-4 w-4" />
-						Go Home
+						Ir al inicio
 					</Link>
 				</div>
 
@@ -58,7 +58,7 @@ export default function ProductNotFound() {
 					className="mt-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
 				>
 					<ArrowLeft className="h-3 w-3" />
-					Go back
+					Volver
 				</Link>
 			</div>
 		</div>

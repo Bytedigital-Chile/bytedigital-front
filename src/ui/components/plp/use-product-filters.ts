@@ -250,7 +250,7 @@ export function useProductFilters({
 
 		// Add category filters from server-resolved data
 		resolvedCategories.forEach((cat) => {
-			filters.unshift({ key: "category", label: "Category", value: cat.name });
+			filters.unshift({ key: "category", label: "Categoría", value: cat.name });
 		});
 
 		return filters;

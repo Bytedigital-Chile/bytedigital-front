@@ -28,7 +28,7 @@ export function CartButton({ itemCount }: CartButtonProps) {
 				</span>
 			)}
 			<span className="sr-only">
-				{itemCount} item{itemCount !== 1 ? "s" : ""} in cart, view bag
+				{itemCount} {itemCount !== 1 ? "artículos" : "artículo"} en el carrito
 			</span>
 		</button>
 	);

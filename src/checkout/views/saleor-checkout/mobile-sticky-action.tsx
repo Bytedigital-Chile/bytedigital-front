@@ -48,18 +48,18 @@ export const MobileStickyAction: FC<MobileStickyActionProps> = ({
 		const infoStep = getStepNumber("INFO", isShippingRequired);
 
 		if (step === paymentStep) {
-			return total ? `Pay ${total}` : "Pay now";
+			return total ? `Pagar ${total}` : "Pagar ahora";
 		}
 
 		if (step === infoStep) {
-			return isShippingRequired ? "Continue to shipping" : "Continue to payment";
+			return isShippingRequired ? "Continuar al envío" : "Continuar al pago";
 		}
 
 		if (step === shippingStep) {
-			return "Continue to payment";
+			return "Continuar al pago";
 		}
 
-		return "Continue";
+		return "Continuar";
 	};
 
 	return (

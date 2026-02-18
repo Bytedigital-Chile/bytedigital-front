@@ -53,7 +53,7 @@ export const generateMetadata = async (props: PageProps, parent: ResolvingMetada
 	const plainDescription = parseEditorJSToText(category?.description);
 
 	return {
-		title: `${category?.name || "Category"} | ${category?.seoTitle || (await parent).title?.absolute}`,
+		title: `${category?.name || "Categoría"} | ${category?.seoTitle || (await parent).title?.absolute}`,
 		description: category?.seoDescription || plainDescription || category?.seoTitle || category?.name,
 	};
 };
@@ -73,7 +73,7 @@ export default async function Page(props: PageProps) {
 	const plainDescription = parseEditorJSToText(category.description);
 
 	const breadcrumbs = [
-		{ label: "Home", href: `/${params.channel}` },
+		{ label: "Inicio", href: `/${params.channel}` },
 		{ label: category.name, href: `/${params.channel}/categories/${params.slug}` },
 	];
 

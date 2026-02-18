@@ -49,12 +49,12 @@ export function LoginForm() {
 		setError("");
 
 		if (!email || !validateEmail(email)) {
-			setError("Please enter a valid email address");
+			setError("Ingresa un correo electrónico válido");
 			return;
 		}
 
 		if (!password) {
-			setError("Please enter your password");
+			setError("Ingresa tu contraseña");
 			return;
 		}
 
@@ -70,9 +70,9 @@ export function LoginForm() {
 					err.message?.toLowerCase().includes("invalid") ||
 					err.message?.toLowerCase().includes("credentials");
 				if (isInvalidCredentials) {
-					setError("Invalid email or password. Please try again.");
+					setError("Correo o contraseña incorrectos. Intenta de nuevo.");
 				} else {
-					setError(err.message || "Sign in failed");
+					setError(err.message || "Error al iniciar sesión");
 				}
 				return;
 			}
@@ -82,7 +82,7 @@ export function LoginForm() {
 				router.refresh();
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -93,17 +93,17 @@ export function LoginForm() {
 		setError("");
 
 		if (!password) {
-			setError("Please enter a new password");
+			setError("Ingresa una nueva contraseña");
 			return;
 		}
 
 		if (password.length < 8) {
-			setError("Password must be at least 8 characters");
+			setError("La contraseña debe tener al menos 8 caracteres");
 			return;
 		}
 
 		if (password !== confirmPassword) {
-			setError("Passwords do not match");
+			setError("Las contraseñas no coinciden");
 			return;
 		}
 
@@ -128,9 +128,9 @@ export function LoginForm() {
 			if (data.errors?.length) {
 				const err = data.errors[0];
 				if (err.code === "INVALID_TOKEN" || err.message?.includes("token")) {
-					setError("This password reset link has expired. Please request a new one.");
+					setError("Este enlace de recuperación ha expirado. Solicita uno nuevo.");
 				} else {
-					setError(err.message || "Failed to set password");
+					setError(err.message || "Error al establecer la contraseña");
 				}
 				return;
 			}
@@ -144,7 +144,7 @@ export function LoginForm() {
 				}, 2000);
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -155,12 +155,12 @@ export function LoginForm() {
 		setSuccessMessage("");
 
 		if (!email) {
-			setError("Please enter your email address first");
+			setError("Ingresa tu correo electrónico primero");
 			return;
 		}
 
 		if (!validateEmail(email)) {
-			setError("Please enter a valid email address");
+			setError("Ingresa un correo electrónico válido");
 			return;
 		}
 
@@ -183,16 +183,16 @@ export function LoginForm() {
 			};
 
 			if (data.errors?.length) {
-				setError(data.errors[0].message || "Failed to send reset link");
+				setError(data.errors[0].message || "Error al enviar el enlace de recuperación");
 				return;
 			}
 
 			setResetEmailSent(true);
 			setSuccessMessage(
-				`If an account exists for ${email}, a password reset link has been sent. Note: You can only request one reset link every 15 minutes.`,
+				`Si existe una cuenta para ${email}, se ha enviado un enlace de recuperación. Nota: Solo puedes solicitar un enlace cada 15 minutos.`,
 			);
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -207,11 +207,11 @@ export function LoginForm() {
 						<div className="flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
 							<CheckCircle className="h-8 w-8 text-green-600" />
 						</div>
-						<h1 className="text-2xl font-semibold">Password Updated!</h1>
+						<h1 className="text-2xl font-semibold">¡Contraseña actualizada!</h1>
 						<p className="text-muted-foreground">
-							Your password has been successfully reset. You are now signed in.
+							Tu contraseña se ha restablecido exitosamente. Ya iniciaste sesión.
 						</p>
-						<p className="text-sm text-muted-foreground">Redirecting you to the store...</p>
+						<p className="text-sm text-muted-foreground">Redirigiendo a la tienda...</p>
 					</div>
 				</div>
 			</div>
@@ -224,9 +224,9 @@ export function LoginForm() {
 			<div className="mx-auto mt-16 w-full max-w-md">
 				<div className="rounded-lg border border-border bg-card p-8 shadow-sm">
 					<div className="mb-6 text-center">
-						<h1 className="text-2xl font-semibold">Set New Password</h1>
+						<h1 className="text-2xl font-semibold">Nueva contraseña</h1>
 						<p className="mt-2 text-sm text-muted-foreground">
-							Enter a new password for <span className="font-medium">{resetEmail}</span>
+							Ingresa una nueva contraseña para <span className="font-medium">{resetEmail}</span>
 						</p>
 					</div>
 
@@ -238,14 +238,14 @@ export function LoginForm() {
 						{/* New Password */}
 						<div className="space-y-1.5">
 							<Label htmlFor="password" className="text-sm font-medium">
-								New Password
+								Nueva contraseña
 							</Label>
 							<div className="relative">
 								<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 								<Input
 									id="password"
 									type={showPassword ? "text" : "password"}
-									placeholder="At least 8 characters"
+									placeholder="Mínimo 8 caracteres"
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
 									className="h-12 pl-10 pr-10"
@@ -264,14 +264,14 @@ export function LoginForm() {
 						{/* Confirm Password */}
 						<div className="space-y-1.5">
 							<Label htmlFor="confirmPassword" className="text-sm font-medium">
-								Confirm Password
+								Confirmar contraseña
 							</Label>
 							<div className="relative">
 								<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 								<Input
 									id="confirmPassword"
 									type={showConfirmPassword ? "text" : "password"}
-									placeholder="Confirm your password"
+									placeholder="Confirma tu contraseña"
 									value={confirmPassword}
 									onChange={(e) => setConfirmPassword(e.target.value)}
 									className="h-12 pl-10 pr-10"
@@ -288,7 +288,7 @@ export function LoginForm() {
 						</div>
 
 						<Button type="submit" disabled={isSubmitting} className="h-12 w-full text-base font-semibold">
-							{isSubmitting ? "Updating..." : "Update Password"}
+							{isSubmitting ? "Actualizando..." : "Actualizar contraseña"}
 						</Button>
 
 						<div className="text-center">
@@ -296,7 +296,7 @@ export function LoginForm() {
 								href={`/${params.channel}/login`}
 								className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground hover:no-underline"
 							>
-								Back to Sign In
+								Volver a iniciar sesión
 							</Link>
 						</div>
 					</form>
@@ -310,14 +310,14 @@ export function LoginForm() {
 		<div className="mx-auto mt-16 w-full max-w-md">
 			<div className="rounded-lg border border-border bg-card p-8 shadow-sm">
 				<div className="mb-6 text-center">
-					<h1 className="text-2xl font-semibold">Welcome Back</h1>
+					<h1 className="text-2xl font-semibold">Bienvenido de vuelta</h1>
 					<p className="mt-2 text-sm text-muted-foreground">
-						Don&apos;t have an account?{" "}
+						&iquest;No tienes cuenta?{" "}
 						<Link
 							href={`/${params.channel}/signup`}
 							className="font-medium text-foreground underline underline-offset-2 hover:no-underline"
 						>
-							Sign up
+							Regístrate
 						</Link>
 					</p>
 				</div>
@@ -332,7 +332,7 @@ export function LoginForm() {
 					{/* Email */}
 					<div className="space-y-1.5">
 						<Label htmlFor="email" className="text-sm font-medium">
-							Email address
+							Correo electrónico
 						</Label>
 						<div className="relative">
 							<Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -354,14 +354,14 @@ export function LoginForm() {
 					{/* Password */}
 					<div className="space-y-1.5">
 						<Label htmlFor="password" className="text-sm font-medium">
-							Password
+							Contraseña
 						</Label>
 						<div className="relative">
 							<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 							<Input
 								id="password"
 								type={showPassword ? "text" : "password"}
-								placeholder="Enter your password"
+								placeholder="Ingresa tu contraseña"
 								value={password}
 								onChange={(e) => setPassword(e.target.value)}
 								className="h-12 pl-10 pr-10"
@@ -385,12 +385,12 @@ export function LoginForm() {
 							disabled={isSubmitting}
 							className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground hover:no-underline disabled:opacity-50"
 						>
-							{resetEmailSent ? "Resend link?" : "Forgot password?"}
+							{resetEmailSent ? "¿Reenviar enlace?" : "¿Olvidaste tu contraseña?"}
 						</button>
 					</div>
 
 					<Button type="submit" disabled={isSubmitting} className="h-12 w-full text-base font-semibold">
-						{isSubmitting ? "Signing in..." : "Sign In"}
+						{isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
 					</Button>
 				</form>
 			</div>

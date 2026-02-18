@@ -63,7 +63,7 @@ export async function generateMetadata(props: {
 	const product = await getProductData(params.slug, params.channel);
 
 	if (!product) {
-		return { title: "Product Not Found" };
+		return { title: "Producto no encontrado" };
 	}
 
 	const description = product.seoDescription || product.name;
@@ -153,7 +153,7 @@ export default async function ProductPage(props: {
 
 	// Breadcrumbs (cached)
 	const breadcrumbs = [
-		{ label: "Home", href: `/${params.channel}` },
+		{ label: "Inicio", href: `/${params.channel}` },
 		...(product.category
 			? [{ label: product.category.name, href: `/${params.channel}/categories/${product.category.slug}` }]
 			: []),

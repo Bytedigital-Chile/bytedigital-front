@@ -96,7 +96,7 @@ export function ImageCarousel({
 	if (!images.length) {
 		return (
 			<div className="flex aspect-[4/5] w-full items-center justify-center rounded-lg bg-secondary">
-				<span className="text-muted-foreground">No image available</span>
+				<span className="text-muted-foreground">Sin imagen disponible</span>
 			</div>
 		);
 	}

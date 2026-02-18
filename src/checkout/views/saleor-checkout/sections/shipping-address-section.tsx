@@ -67,7 +67,7 @@ export const ShippingAddressSection: FC<ShippingAddressSectionProps> = ({
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-xl font-semibold">Shipping address</h2>
+			<h2 className="text-xl font-semibold">Dirección de envío</h2>
 
 			{showAddressList ? (
 				<>
@@ -76,9 +76,9 @@ export const ShippingAddressSection: FC<ShippingAddressSectionProps> = ({
 						selectedAddressId={selectedAddressId}
 						onSelectAddress={onSelectAddress}
 						defaultAddressId={defaultAddressId}
-						emptyMessage="You don't have any saved addresses yet. Please enter your shipping address below."
+						emptyMessage="Aún no tienes direcciones guardadas. Por favor ingresa tu dirección de envío a continuación."
 						addressType="SHIPPING"
-						sheetTitle="Select shipping address"
+						sheetTitle="Seleccionar dirección de envío"
 						onAddNew={() => onShowNewAddressForm(true)}
 					/>
 					{errors.address && <FieldError error={errors.address} />}
@@ -92,20 +92,20 @@ export const ShippingAddressSection: FC<ShippingAddressSectionProps> = ({
 							onClick={() => onShowNewAddressForm(false)}
 							className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground hover:no-underline"
 						>
-							← Back to saved addresses
+							← Volver a direcciones guardadas
 						</button>
 					)}
 
 					{/* Country selector */}
 					<div className="space-y-2">
 						<Label htmlFor="country" className="text-sm font-medium">
-							Country/Region
+							País/Región
 						</Label>
 						<FormSelect
 							id="country"
 							value={countryCode}
 							onChange={onCountryChange}
-							placeholder="Select country"
+							placeholder="Seleccionar país"
 							autoComplete="country"
 							options={availableCountries.map((code) => ({
 								value: code,

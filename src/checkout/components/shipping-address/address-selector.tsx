@@ -18,7 +18,7 @@ export interface AddressSelectorProps {
 	selectedAddressId: string | null;
 	/** Called when an address is selected */
 	onSelectAddress: (id: string) => void;
-	/** Default address ID (shows "Default" badge) */
+	/** Default address ID (shows "Predeterminada" badge) */
 	defaultAddressId?: string;
 	/** Empty state message */
 	emptyMessage?: string;
@@ -40,7 +40,7 @@ export const AddressSelector: FC<AddressSelectorProps> = ({
 	selectedAddressId,
 	onSelectAddress,
 	defaultAddressId,
-	emptyMessage = "You don't have any saved addresses yet.",
+	emptyMessage = "Aún no tienes direcciones guardadas.",
 	name = "shippingAddress",
 	addressType = "SHIPPING",
 	onDefaultChange,
@@ -135,7 +135,7 @@ export const AddressSelector: FC<AddressSelectorProps> = ({
 								</span>
 								{isDefault && (
 									<span className="rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-										Default
+										Predeterminada
 									</span>
 								)}
 							</div>
@@ -160,7 +160,7 @@ export const AddressSelector: FC<AddressSelectorProps> = ({
 								}}
 								className="shrink-0 rounded px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
 							>
-								Edit
+								Editar
 							</button>
 						)}
 					</label>
@@ -181,7 +181,7 @@ export const AddressSelector: FC<AddressSelectorProps> = ({
 						className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground"
 					>
 						{isSettingDefault && <LoadingSpinner />}
-						Set as my default {addressType === "SHIPPING" ? "shipping" : "billing"} address
+						Establecer como mi dirección de {addressType === "SHIPPING" ? "envío" : "facturación"} predeterminada
 					</Label>
 				</div>
 			)}

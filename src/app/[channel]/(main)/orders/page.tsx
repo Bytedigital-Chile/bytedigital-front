@@ -49,13 +49,13 @@ async function OrdersContent() {
 	return (
 		<div className="mx-auto max-w-7xl p-8">
 			<h1 className="text-2xl font-bold tracking-tight text-neutral-900">
-				{user.firstName ? user.firstName : user.email}&rsquo;s orders
+				Pedidos de {user.firstName ? user.firstName : user.email}
 			</h1>
 
 			{orders.length === 0 ? (
 				<div className="mt-8">
 					<div className="rounded border border-neutral-100 bg-white p-4">
-						<div className="flex items-center">No orders found</div>
+						<div className="flex items-center">No se encontraron pedidos</div>
 					</div>
 				</div>
 			) : (

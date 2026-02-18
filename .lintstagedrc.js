@@ -8,7 +8,7 @@ const buildEslintCommand = (filenames) => {
 		.map((filename) => `"${filename}"`)
 		.join(" ");
 
-	return `pnpm eslint --fix ${files}`;
+	return `npx eslint --fix ${files}`;
 };
 
 const config = {

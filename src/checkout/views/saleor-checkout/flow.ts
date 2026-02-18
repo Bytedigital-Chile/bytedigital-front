@@ -16,15 +16,15 @@ interface CheckoutStep {
  * Handles conditional steps (like shipping) based on checkout state.
  */
 export const getCheckoutSteps = (isShippingRequired: boolean): CheckoutStep[] => {
-	const steps: Omit<CheckoutStep, "index">[] = [{ id: "INFO", label: "Information", slug: "contact" }];
+	const steps: Omit<CheckoutStep, "index">[] = [{ id: "INFO", label: "Información", slug: "contact" }];
 
 	if (isShippingRequired) {
-		steps.push({ id: "SHIPPING", label: "Shipping", slug: "shipping" });
+		steps.push({ id: "SHIPPING", label: "Envío", slug: "shipping" });
 	}
 
 	steps.push(
-		{ id: "PAYMENT", label: "Payment", slug: "payment" },
-		{ id: "CONFIRMATION", label: "Confirmation", slug: "confirmation" },
+		{ id: "PAYMENT", label: "Pago", slug: "payment" },
+		{ id: "CONFIRMATION", label: "Confirmación", slug: "confirmation" },
 	);
 
 	// Add 1-based indices

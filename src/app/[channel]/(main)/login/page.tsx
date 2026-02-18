@@ -7,8 +7,8 @@ import { executeAuthenticatedGraphQL } from "@/lib/graphql";
 import { CurrentUserDocument } from "@/gql/graphql";
 
 export const metadata = {
-	title: "Sign In",
-	description: "Sign in to your account to access your orders and saved addresses.",
+	title: "Iniciar sesión",
+	description: "Inicia sesión en tu cuenta para acceder a tus pedidos y direcciones guardadas.",
 };
 
 /**

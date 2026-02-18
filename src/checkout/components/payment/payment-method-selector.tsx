@@ -93,8 +93,8 @@ export const PaymentMethodSelector: FC<PaymentMethodSelectorProps> = ({
 
 	return (
 		<section className="space-y-4">
-			<h2 className="text-lg font-semibold">Payment</h2>
-			<p className="text-sm text-muted-foreground">All transactions are secure and encrypted.</p>
+			<h2 className="text-lg font-semibold">Pago</h2>
+			<p className="text-sm text-muted-foreground">Todas las transacciones son seguras y encriptadas.</p>
 
 			<div className="space-y-3">
 				{/* Credit Card */}
@@ -116,7 +116,7 @@ export const PaymentMethodSelector: FC<PaymentMethodSelectorProps> = ({
 							/>
 							<RadioIndicator selected={value === "card"} />
 							<CreditCard className="h-5 w-5 text-muted-foreground" />
-							<span className="font-medium">Credit card</span>
+							<span className="font-medium">Tarjeta de crédito</span>
 							<div className="ml-auto flex gap-1">
 								<CardBrandIcon brand="visa" />
 								<CardBrandIcon brand="mastercard" />
@@ -128,7 +128,7 @@ export const PaymentMethodSelector: FC<PaymentMethodSelectorProps> = ({
 							<div className="bg-secondary/30 space-y-4 border-t border-border p-4">
 								<div className="relative">
 									<Input
-										placeholder="Card number"
+										placeholder="Número de tarjeta"
 										value={card.cardNumber}
 										onChange={(e) => updateCardField("cardNumber", formatCardNumber(e.target.value))}
 										maxLength={19}
@@ -151,7 +151,7 @@ export const PaymentMethodSelector: FC<PaymentMethodSelectorProps> = ({
 									/>
 								</div>
 								<Input
-									placeholder="Name on card"
+									placeholder="Nombre en la tarjeta"
 									value={card.nameOnCard}
 									onChange={(e) => updateCardField("nameOnCard", e.target.value)}
 								/>

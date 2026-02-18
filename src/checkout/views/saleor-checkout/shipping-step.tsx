@@ -58,7 +58,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 			}
 
 			if (!selectedMethod) {
-				setError("Please select a shipping method");
+				setError("Por favor selecciona un método de envío");
 				// Focus the first radio option
 				const firstRadio = document.querySelector('input[name="shipping"]') as HTMLElement;
 				firstRadio?.focus();
@@ -82,7 +82,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 				});
 
 				if (result.error) {
-					setError("Failed to update shipping method");
+					setError("Error al actualizar el método de envío");
 					return;
 				}
 
@@ -94,7 +94,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 		[selectedMethod, currentMethodId, onNext, updateDeliveryMethod, checkout.id],
 	);
 
-	const buttonText = isSubmittingLocal ? "Saving..." : "Continue to payment";
+	const buttonText = isSubmittingLocal ? "Guardando..." : "Continuar al pago";
 
 	return (
 		<form className="space-y-8" onSubmit={handleSubmit}>
@@ -103,23 +103,23 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 
 			{/* Shipping Methods */}
 			<section className="space-y-4">
-				<h2 className="text-lg font-semibold">Shipping method</h2>
+				<h2 className="text-lg font-semibold">Método de envío</h2>
 
 				{error && <p className="text-sm text-destructive">{error}</p>}
 
 				{fetching ? (
 					<div className="flex items-center gap-3 rounded-lg border border-border p-4">
 						<div className="h-5 w-5 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
-						<p className="text-sm text-muted-foreground">Loading shipping methods...</p>
+						<p className="text-sm text-muted-foreground">Cargando métodos de envío...</p>
 					</div>
 				) : shippingMethods.length === 0 ? (
 					<div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
 						<p className="text-sm text-amber-800">
 							{!hasShippingAddress
-								? "Please go back and enter your shipping address first."
-								: `No shipping methods available for ${
-										checkout.shippingAddress?.country?.country || "your address"
-									}. Please check your address or contact support.`}
+								? "Por favor vuelve atrás e ingresa tu dirección de envío primero."
+								: `No hay métodos de envío disponibles para ${
+										checkout.shippingAddress?.country?.country || "tu dirección"
+									}. Por favor revisa tu dirección o contacta a soporte.`}
 						</p>
 					</div>
 				) : (
@@ -173,7 +173,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 										</div>
 										{method.minimumDeliveryDays && method.maximumDeliveryDays && (
 											<p className="text-sm text-muted-foreground">
-												{method.minimumDeliveryDays}-{method.maximumDeliveryDays} business days
+												{method.minimumDeliveryDays}-{method.maximumDeliveryDays} días hábiles
 											</p>
 										)}
 									</div>
@@ -193,7 +193,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 					className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
 				>
 					<ChevronLeft className="h-4 w-4" />
-					Return to information
+					Volver a información
 				</button>
 				<Button
 					type="submit"
@@ -211,7 +211,7 @@ export const ShippingStep: FC<ShippingStepProps> = ({ checkout: initialCheckout,
 				onAction={handleSubmit}
 				isLoading={isSubmittingLocal}
 				disabled={!selectedMethod}
-				loadingText="Saving..."
+				loadingText="Guardando..."
 			/>
 		</form>
 	);

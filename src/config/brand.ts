@@ -27,13 +27,13 @@ export const brandConfig = {
 	defaultBrand: "Saleor Store",
 
 	/** Tagline/description for the store */
-	tagline: "Premium products with exceptional quality. Discover our curated collection.",
+	tagline: "Productos de calidad excepcional. Descubre nuestra colección.",
 
 	/** Homepage meta description */
-	description: "Starter pack for building performant e-commerce experiences with Saleor.",
+	description: "Tienda online con los mejores productos. Experiencia de compra rápida y segura.",
 
 	/** Logo aria-label for accessibility */
-	logoAriaLabel: "Store",
+	logoAriaLabel: "Tienda",
 
 	/** Title template - %s will be replaced with page title */
 	titleTemplate: "%s | Saleor Store",
@@ -61,5 +61,5 @@ export function formatPageTitle(title: string): string {
  * Use CopyrightText component for dynamic year in Server Components.
  */
 export function getCopyrightText(year: number = new Date().getFullYear()): string {
-	return `© ${year} ${brandConfig.copyrightHolder}. All rights reserved.`;
+	return `© ${year} ${brandConfig.copyrightHolder}. Todos los derechos reservados.`;
 }

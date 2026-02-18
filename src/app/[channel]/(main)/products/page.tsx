@@ -9,8 +9,8 @@ import { resolveCategorySlugsToIds } from "@/ui/components/plp/filter-utils.serv
 import { ProductsPageClient } from "./products-client";
 
 export const metadata = {
-	title: "Products · Saleor Storefront example",
-	description: "All products in Saleor Storefront example",
+	title: "Productos · ByteDigital",
+	description: "Todos los productos de nuestra tienda",
 };
 
 type PageProps = {
@@ -34,16 +34,16 @@ export default async function Page(props: PageProps) {
 	const params = await props.params;
 
 	const breadcrumbs = [
-		{ label: "Home", href: `/${params.channel}` },
-		{ label: "Products", href: `/${params.channel}/products` },
+		{ label: "Inicio", href: `/${params.channel}` },
+		{ label: "Productos", href: `/${params.channel}/products` },
 	];
 
 	return (
 		<>
 			{/* Static shell - renders immediately */}
 			<CategoryHero
-				title="All Products"
-				description="Discover our full collection of premium products."
+				title="Todos los Productos"
+				description="Descubre nuestra colección completa de productos."
 				breadcrumbs={breadcrumbs}
 			/>
 			{/* Dynamic content - streams in via Suspense */}

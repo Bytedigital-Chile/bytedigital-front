@@ -20,7 +20,7 @@ export interface ProductCardData {
 	imageAlt?: string;
 	hoverImage?: string | null;
 	href: string;
-	badge?: "Sale" | "New" | null;
+	badge?: "Sale" | "New" | "Oferta" | "Nuevo" | null;
 	colors?: { name: string; hex: string }[];
 	/** Available sizes for filtering (e.g., ["S", "M", "L"]) */
 	sizes?: string[];
@@ -49,7 +49,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 	};
 
 	const formatPrice = (amount: number, currency: string) => {
-		return new Intl.NumberFormat("en", {
+		return new Intl.NumberFormat("es-CL", {
 			style: "currency",
 			currency: currency,
 		}).format(amount);
@@ -77,7 +77,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 					{product.hoverImage && (
 						<Image
 							src={product.hoverImage}
-							alt={`${product.name} - alternate view`}
+							alt={`${product.name} - vista alternativa`}
 							fill
 							sizes="(max-width: 1024px) 50vw, 33vw"
 							className="object-cover opacity-0 transition-all duration-500 ease-out md:group-hover:scale-105 md:group-hover:opacity-100"
@@ -87,19 +87,19 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
 					{/* Badge */}
 					{product.badge && (
 						<Badge
-							variant={product.badge === "Sale" ? "destructive" : "default"}
+							variant={product.badge === "Sale" || product.badge === "Oferta" ? "destructive" : "default"}
 							className="absolute left-3 top-3"
 						>
-							{product.badge}
+							{product.badge === "Sale" ? "Oferta" : product.badge === "New" ? "Nuevo" : product.badge}
 						</Badge>
 					)}
 
-					{/* Quick Add Overlay - desktop only to avoid double-tap on touch */}
+					{/* Agregar rápido Overlay - solo desktop para evitar doble tap en touch */}
 					{canQuickAdd && (
 						<div className="absolute bottom-0 left-0 right-0 hidden translate-y-2 p-3 opacity-0 transition-all duration-300 md:block md:group-hover:translate-y-0 md:group-hover:opacity-100">
 							<Button className="w-full" size="sm" onClick={handleQuickAdd} type="button">
 								<Plus className="mr-1.5 h-4 w-4" />
-								Quick Add
+								Agregar
 							</Button>
 						</div>
 					)}

@@ -183,7 +183,7 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 
 	const handleEmailBlur = () => {
 		if (email && !validateEmail(email)) {
-			setErrors((prev) => ({ ...prev, email: "Please enter a valid email address" }));
+			setErrors((prev) => ({ ...prev, email: "Por favor ingresa un correo electrónico válido" }));
 		}
 	};
 
@@ -246,12 +246,12 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 
 			// Validate email (guests only)
 			if (!authenticated) {
-				if (!email) newErrors.email = "Email is required";
-				else if (!validateEmail(email)) newErrors.email = "Please enter a valid email";
+				if (!email) newErrors.email = "El correo electrónico es obligatorio";
+				else if (!validateEmail(email)) newErrors.email = "Por favor ingresa un correo electrónico válido";
 
 				if (createAccount) {
-					if (!accountPassword) newErrors.password = "Password is required";
-					else if (accountPassword.length < 8) newErrors.password = "Password must be at least 8 characters";
+					if (!accountPassword) newErrors.password = "La contraseña es obligatoria";
+					else if (accountPassword.length < 8) newErrors.password = "La contraseña debe tener al menos 8 caracteres";
 				}
 			}
 
@@ -259,12 +259,12 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 			if (checkout.isShippingRequired) {
 				if (authenticated && user?.addresses?.length && !showNewAddressForm) {
 					if (!selectedAddressId) {
-						newErrors.address = "Please select a shipping address";
+						newErrors.address = "Por favor selecciona una dirección de envío";
 					}
 				} else {
 					orderedAddressFields.forEach((field) => {
 						if (isRequiredField(field) && !formData[field]) {
-							newErrors[field] = `${getFieldLabel(field)} is required`;
+							newErrors[field] = `${getFieldLabel(field)} es obligatorio`;
 						}
 					});
 				}
@@ -290,14 +290,14 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 						languageCode: localeConfig.graphqlLanguageCode,
 					});
 					if (emailResult.error) {
-						setErrors({ email: "Failed to update email" });
+						setErrors({ email: "Error al actualizar el correo electrónico" });
 						return;
 					}
 					const emailErrors = emailResult.data?.checkoutEmailUpdate?.errors;
 					if (emailErrors?.length) {
 						const errorMap: Record<string, string> = {};
 						emailErrors.forEach((err) => {
-							errorMap[err.field || "email"] = err.message || "Invalid value";
+							errorMap[err.field || "email"] = err.message || "Valor inválido";
 						});
 						setErrors(errorMap);
 						return;
@@ -316,7 +316,7 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 						if (registerResult.data?.accountRegister?.errors?.length) {
 							const err = registerResult.data.accountRegister.errors[0];
 							if (err.code !== "UNIQUE") {
-								setErrors({ password: err.message || "Failed to create account" });
+								setErrors({ password: err.message || "Error al crear la cuenta" });
 								return;
 							}
 						}
@@ -343,7 +343,7 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 						});
 
 						if (addressResult.error) {
-							setErrors({ streetAddress1: "Failed to update address" });
+							setErrors({ streetAddress1: "Error al actualizar la dirección" });
 							return;
 						}
 						const addressErrors = addressResult.data?.checkoutShippingAddressUpdate?.errors;
@@ -351,7 +351,7 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 							const errorMap: Record<string, string> = {};
 							addressErrors.forEach((err) => {
 								const field = err.field || "streetAddress1";
-								errorMap[field] = err.message || "Invalid value";
+								errorMap[field] = err.message || "Valor inválido";
 							});
 							setErrors(errorMap);
 							return;
@@ -424,10 +424,10 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 
 	// ----- Render: Main Form -----
 	const buttonText = isSubmitting
-		? "Saving..."
+		? "Guardando..."
 		: checkout.isShippingRequired
-			? "Continue to shipping"
-			: "Continue to payment";
+			? "Continuar al envío"
+			: "Continuar al pago";
 
 	return (
 		<form className="space-y-8" onSubmit={handleSubmit} noValidate>
@@ -487,7 +487,7 @@ export const InformationStep: FC<InformationStepProps> = ({ checkout, onNext }) 
 				type="submit"
 				onAction={handleSubmit}
 				isLoading={isSubmitting}
-				loadingText="Saving..."
+				loadingText="Guardando..."
 			/>
 		</form>
 	);

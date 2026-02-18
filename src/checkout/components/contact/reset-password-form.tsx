@@ -44,19 +44,19 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 		setError("");
 
 		if (password.length < 8) {
-			setError("Password must be at least 8 characters");
+			setError("La contraseña debe tener al menos 8 caracteres");
 			return;
 		}
 
 		if (password !== confirmPassword) {
-			setError("Passwords do not match");
+			setError("Las contraseñas no coinciden");
 			return;
 		}
 
 		const { passwordResetToken, passwordResetEmail } = getQueryParams(searchParams);
 
 		if (!passwordResetToken) {
-			setError("Invalid or expired reset link");
+			setError("Enlace de restablecimiento inválido o expirado");
 			return;
 		}
 
@@ -70,7 +70,7 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 
 			if (result.data?.setPassword?.errors?.length) {
 				const err = result.data.setPassword.errors[0];
-				setError(err.message || "Failed to reset password");
+				setError(err.message || "Error al restablecer la contraseña");
 			} else if (result.data?.setPassword?.token) {
 				// Clear the URL params
 				const newQuery = createQueryString(searchParams, {
@@ -80,10 +80,10 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 				router.replace(`?${newQuery}`, { scroll: false });
 				onSuccess();
 			} else {
-				setError("Failed to reset password. The link may have expired.");
+				setError("Error al restablecer la contraseña. El enlace puede haber expirado.");
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Por favor intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -92,22 +92,22 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div>
-				<h2 className="text-xl font-semibold">Reset your password</h2>
-				<p className="mt-1 text-sm text-muted-foreground">Enter a new password for your account</p>
+				<h2 className="text-xl font-semibold">Restablecer tu contraseña</h2>
+				<p className="mt-1 text-sm text-muted-foreground">Ingresa una nueva contraseña para tu cuenta</p>
 			</div>
 
 			{error && <div className="bg-destructive/10 rounded-md p-3 text-sm text-destructive">{error}</div>}
 
 			<div className="space-y-1.5">
 				<Label htmlFor="new-password" className="text-sm font-medium">
-					New password
+					Nueva contraseña
 				</Label>
 				<div className="relative">
 					<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						id="new-password"
 						type={showPassword ? "text" : "password"}
-						placeholder="Minimum 8 characters"
+						placeholder="Mínimo 8 caracteres"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						autoComplete="new-password"
@@ -127,14 +127,14 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 
 			<div className="space-y-1.5">
 				<Label htmlFor="confirm-password" className="text-sm font-medium">
-					Confirm password
+					Confirmar contraseña
 				</Label>
 				<div className="relative">
 					<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						id="confirm-password"
 						type={showPassword ? "text" : "password"}
-						placeholder="Re-enter your password"
+						placeholder="Reingresa tu contraseña"
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
 						autoComplete="new-password"
@@ -150,10 +150,10 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ onSuccess, onBac
 					onClick={onBackToSignIn}
 					className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground hover:no-underline"
 				>
-					Back to sign in
+					Volver a iniciar sesión
 				</button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Resetting..." : "Reset password"}
+					{isSubmitting ? "Restableciendo..." : "Restablecer contraseña"}
 				</Button>
 			</div>
 		</form>

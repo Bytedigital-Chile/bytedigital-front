@@ -4,9 +4,9 @@ import { executePublicGraphQL } from "@/lib/graphql";
 import { ProductList } from "@/ui/components/product-list";
 
 export const metadata = {
-	title: "ACME Storefront, powered by Saleor & Next.js",
+	title: "ByteDigital · Tienda online",
 	description:
-		"Storefront Next.js Example for building performant e-commerce experiences with Saleor - the composable, headless commerce platform for global brands.",
+		"Descubre nuestra tienda online con los mejores productos. Experiencia de compra rápida y segura.",
 };
 
 /**
@@ -48,7 +48,7 @@ export default async function Page(props: { params: Promise<{ channel: string }>
 
 	return (
 		<section className="mx-auto max-w-7xl p-8 pb-16">
-			<h2 className="sr-only">Product list</h2>
+			<h2 className="sr-only">Lista de productos</h2>
 			<ProductList products={products} />
 		</section>
 	);

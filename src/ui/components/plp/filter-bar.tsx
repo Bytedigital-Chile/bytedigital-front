@@ -102,16 +102,16 @@ export function FilterBar({
 			<div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
 				{/* Main Filter Row */}
 				<div className="flex items-center justify-between gap-4">
-					{/* Left: Filters */}
+					{/* Left: Filtros */}
 					{/* -mx-1 px-1 py-1 -my-1 provides breathing room for focus rings inside overflow */}
 					<div className="scrollbar-hide -mx-1 -my-1 flex items-center gap-2 overflow-x-auto px-1 py-1">
-						{/* All Filters Button (Mobile) - Opens Sheet */}
+						{/* All Filtros Button (Mobile) - Opens Sheet */}
 						{hasFilters && (
 							<Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
 								<SheetTrigger asChild>
 									<Button variant="outline-solid" size="sm" className="shrink-0 bg-transparent md:hidden">
 										<SlidersHorizontal className="mr-2 h-4 w-4" />
-										Filters
+										Filtros
 										{activeFilterCount > 0 && (
 											<Badge variant="secondary" className="ml-2 h-5 px-1.5 py-0 text-xs">
 												{activeFilterCount}
@@ -121,17 +121,17 @@ export function FilterBar({
 								</SheetTrigger>
 								<SheetContent side="left" className="flex w-[280px] flex-col p-0">
 									<SheetHeader className="flex-row items-center justify-between border-b border-border px-4 py-4">
-										<SheetTitle>Filters</SheetTitle>
+										<SheetTitle>Filtros</SheetTitle>
 										<SheetCloseButton />
 									</SheetHeader>
 
 									<div className="flex-1 overflow-y-auto">
 										<div className="divide-y divide-border">
-											{/* Mobile Category Filter */}
+											{/* Mobile Categoría Filter */}
 											{categoryOptions.length > 0 && onCategoryToggle && (
 												<div className="px-4 py-6">
 													<h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-														Category
+														Categoría
 													</h3>
 													<div className="space-y-3">
 														{categoryOptions.map((category) => {
@@ -198,11 +198,11 @@ export function FilterBar({
 												</div>
 											)}
 
-											{/* Mobile Size Filter */}
+											{/* Mobile Talla Filter */}
 											{sizeOptions.length > 0 && onSizeToggle && (
 												<div className="px-4 py-6">
 													<h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-														Size
+														Talla
 													</h3>
 													<div className="flex flex-wrap gap-2">
 														{sizeOptions.map((size) => {
@@ -225,11 +225,11 @@ export function FilterBar({
 												</div>
 											)}
 
-											{/* Mobile Price Filter */}
+											{/* Mobile Precio Filter */}
 											{priceRanges.length > 0 && onPriceRangeChange && (
 												<div className="px-4 py-6">
 													<h3 className="mb-4 text-sm font-medium uppercase tracking-wide text-muted-foreground">
-														Price
+														Precio
 													</h3>
 													<div className="space-y-3">
 														{priceRanges.map((range) => {
@@ -268,7 +268,7 @@ export function FilterBar({
 													setMobileFiltersOpen(false);
 												}}
 											>
-												Clear all filters ({activeFilterCount})
+												Limpiar filtros ({activeFilterCount})
 											</Button>
 										</div>
 									)}
@@ -276,7 +276,7 @@ export function FilterBar({
 							</Sheet>
 						)}
 
-						{/* Category Filter - counts hidden since filtering is server-side */}
+						{/* Categoría Filter - counts hidden since filtering is server-side */}
 						{categoryOptions.length > 0 && onCategoryToggle && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
@@ -285,7 +285,7 @@ export function FilterBar({
 										size="sm"
 										className="hidden shrink-0 bg-transparent md:flex"
 									>
-										Category
+										Categoría
 										{selectedCategories.length > 0 && (
 											<Badge variant="secondary" className="ml-2 h-5 px-1.5 py-0 text-xs">
 												{selectedCategories.length}
@@ -295,7 +295,7 @@ export function FilterBar({
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="start" className="w-56">
-									<DropdownMenuLabel>Category</DropdownMenuLabel>
+									<DropdownMenuLabel>Categoría</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 									{categoryOptions.map((category) => (
 										<DropdownMenuCheckboxItem
@@ -351,7 +351,7 @@ export function FilterBar({
 							</DropdownMenu>
 						)}
 
-						{/* Size Filter */}
+						{/* Talla Filter */}
 						{sizeOptions.length > 0 && onSizeToggle && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
@@ -360,7 +360,7 @@ export function FilterBar({
 										size="sm"
 										className="hidden shrink-0 bg-transparent md:flex"
 									>
-										Size
+										Talla
 										{selectedSizes.length > 0 && (
 											<Badge variant="secondary" className="ml-2 h-5 px-1.5 py-0 text-xs">
 												{selectedSizes.length}
@@ -370,7 +370,7 @@ export function FilterBar({
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="start" className="w-48">
-									<DropdownMenuLabel>Size</DropdownMenuLabel>
+									<DropdownMenuLabel>Talla</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 									{sizeOptions.map((size) => (
 										<DropdownMenuCheckboxItem
@@ -386,7 +386,7 @@ export function FilterBar({
 							</DropdownMenu>
 						)}
 
-						{/* Price Filter - counts hidden since filtering is server-side */}
+						{/* Precio Filter - counts hidden since filtering is server-side */}
 						{priceRanges.length > 0 && onPriceRangeChange && (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
@@ -395,7 +395,7 @@ export function FilterBar({
 										size="sm"
 										className="hidden shrink-0 bg-transparent md:flex"
 									>
-										Price
+										Precio
 										{selectedPriceRange && (
 											<Badge variant="secondary" className="ml-2 h-5 px-1.5 py-0 text-xs">
 												1
@@ -405,7 +405,7 @@ export function FilterBar({
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="start" className="w-48">
-									<DropdownMenuLabel>Price Range</DropdownMenuLabel>
+									<DropdownMenuLabel>Rango de precio</DropdownMenuLabel>
 									<DropdownMenuSeparator />
 									<DropdownMenuRadioGroup
 										value={selectedPriceRange || ""}
@@ -425,13 +425,13 @@ export function FilterBar({
 					{/* Right: Result Count + Sort */}
 					<div className="flex shrink-0 items-center gap-3">
 						<span className="hidden text-sm text-muted-foreground sm:block">
-							{resultCount} {resultCount === 1 ? "product" : "products"}
+							{resultCount} {resultCount === 1 ? "producto" : "productos"}
 						</span>
 
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline-solid" size="sm" className="bg-transparent">
-									Sort
+									Ordenar
 									<ChevronDown className="ml-1.5 h-4 w-4 opacity-50" />
 								</Button>
 							</DropdownMenuTrigger>
@@ -440,18 +440,18 @@ export function FilterBar({
 									value={sortValue}
 									onValueChange={(v) => onSortChange(v as SortOption)}
 								>
-									<DropdownMenuRadioItem value="featured">Featured</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="newest">Newest</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="price_asc">Price: Low to High</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="price_desc">Price: High to Low</DropdownMenuRadioItem>
-									<DropdownMenuRadioItem value="bestselling">Best Selling</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="featured">Destacados</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="newest">Más nuevos</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="price_asc">Precio: menor a mayor</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="price_desc">Precio: mayor a menor</DropdownMenuRadioItem>
+									<DropdownMenuRadioItem value="bestselling">Más vendidos</DropdownMenuRadioItem>
 								</DropdownMenuRadioGroup>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
 				</div>
 
-				{/* Active Filters Row */}
+				{/* Active Filtros Row */}
 				{activeFilters.length > 0 && onRemoveFilter && onClearFilters && (
 					<div className="scrollbar-hide -mx-1 mt-3 flex items-center gap-2 overflow-x-auto px-1 py-1">
 						{activeFilters.map((filter) => (
@@ -467,7 +467,7 @@ export function FilterBar({
 									className="hover:bg-background/50 ml-0.5 rounded-full p-0.5 transition-colors"
 								>
 									<X className="h-3 w-3" />
-									<span className="sr-only">Remove {filter.value} filter</span>
+									<span className="sr-only">Quitar filtro {filter.value}</span>
 								</button>
 							</Badge>
 						))}
@@ -477,7 +477,7 @@ export function FilterBar({
 							className="h-6 shrink-0 px-2 text-xs text-muted-foreground"
 							onClick={onClearFilters}
 						>
-							Clear all
+							Limpiar todo
 						</Button>
 					</div>
 				)}

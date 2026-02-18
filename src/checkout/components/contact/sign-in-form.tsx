@@ -55,14 +55,14 @@ export const SignInForm: FC<SignInFormProps> = ({
 			const result = await signIn({ email, password });
 			if (result.data?.tokenCreate?.errors?.length) {
 				const err = result.data.tokenCreate.errors[0];
-				setError(err.message || "Invalid email or password");
+				setError(err.message || "Correo o contraseña inválidos");
 			} else if (result.data?.tokenCreate?.token) {
 				onSuccess();
 			} else {
-				setError("Sign in failed. Please try again.");
+				setError("Error al iniciar sesión. Por favor intenta de nuevo.");
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Por favor intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -73,12 +73,12 @@ export const SignInForm: FC<SignInFormProps> = ({
 		setSuccessMessage("");
 
 		if (!email) {
-			setError("Please enter your email address first");
+			setError("Por favor ingresa tu correo electrónico primero");
 			return;
 		}
 
 		if (!validateEmail(email)) {
-			setError("Please enter a valid email address");
+			setError("Por favor ingresa un correo electrónico válido");
 			return;
 		}
 
@@ -91,22 +91,22 @@ export const SignInForm: FC<SignInFormProps> = ({
 			});
 
 			if (result.error) {
-				setError(result.error.message || "Failed to send reset link");
+				setError(result.error.message || "Error al enviar el enlace de restablecimiento");
 				return;
 			}
 
 			if (result.data?.requestPasswordReset?.errors?.length) {
 				const err = result.data.requestPasswordReset.errors[0];
-				setError(err.message || "Failed to send reset link");
+				setError(err.message || "Error al enviar el enlace de restablecimiento");
 			} else {
 				setPasswordResetSent(true);
 				setSuccessMessage(
-					`If an account exists for ${email}, a password reset link has been sent. ` +
-						`Note: You can only request one reset link every 15 minutes.`,
+					`Si existe una cuenta para ${email}, se ha enviado un enlace de restablecimiento. ` +
+						`Nota: Solo puedes solicitar un enlace de restablecimiento cada 15 minutos.`,
 				);
 			}
 		} catch {
-			setError("An error occurred. Please try again.");
+			setError("Ocurrió un error. Por favor intenta de nuevo.");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -115,15 +115,15 @@ export const SignInForm: FC<SignInFormProps> = ({
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="text-xl font-semibold">Sign in</h2>
+				<h2 className="text-xl font-semibold">Iniciar sesión</h2>
 				<p className="text-sm text-muted-foreground">
-					New customer?{" "}
+					¿Cliente nuevo?{" "}
 					<button
 						type="button"
 						onClick={onGuestCheckout}
 						className="font-medium text-foreground underline underline-offset-2 hover:no-underline"
 					>
-						Guest checkout
+						Comprar como invitado
 					</button>
 				</p>
 			</div>
@@ -139,7 +139,7 @@ export const SignInForm: FC<SignInFormProps> = ({
 					<Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						type="email"
-						placeholder="Email address"
+						placeholder="Correo electrónico"
 						value={email}
 						onChange={(e) => {
 							setEmail(e.target.value);
@@ -157,7 +157,7 @@ export const SignInForm: FC<SignInFormProps> = ({
 					<Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						type={showPassword ? "text" : "password"}
-						placeholder="Password"
+						placeholder="Contraseña"
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						autoComplete="current-password"
@@ -181,10 +181,10 @@ export const SignInForm: FC<SignInFormProps> = ({
 					disabled={isSubmitting}
 					className="text-sm text-muted-foreground underline underline-offset-2 hover:text-foreground hover:no-underline disabled:opacity-50"
 				>
-					{passwordResetSent ? "Resend link?" : "Forgot password?"}
+					{passwordResetSent ? "¿Reenviar enlace?" : "¿Olvidaste tu contraseña?"}
 				</button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Processing..." : "Sign in"}
+					{isSubmitting ? "Procesando..." : "Iniciar sesión"}
 				</Button>
 			</div>
 		</form>
