@@ -1,5 +1,22 @@
 <template>
-  <div v-if="product" class="max-w-7xl mx-auto px-4 py-6">
+  <!-- Loading -->
+  <div v-if="loading" class="max-w-7xl mx-auto px-4 py-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+      <div class="space-y-4">
+        <div class="h-6 bg-gray-200 rounded w-1/3 animate-pulse" />
+        <div class="h-8 bg-gray-200 rounded w-2/3 animate-pulse" />
+        <div class="h-12 bg-gray-200 rounded w-1/4 animate-pulse" />
+      </div>
+    </div>
+  </div>
+  <!-- Not found -->
+  <div v-else-if="notFound" class="max-w-7xl mx-auto px-4 py-16 text-center">
+    <p class="text-gray-500 text-lg">Producto no encontrado</p>
+    <NuxtLink to="/" class="text-primary-600 hover:underline mt-4 inline-block">Volver al inicio</NuxtLink>
+  </div>
+  <!-- Product content -->
+  <div v-else-if="product" class="max-w-7xl mx-auto px-4 py-6">
     <!-- Breadcrumb -->
     <nav class="text-sm text-gray-500 mb-6">
       <NuxtLink to="/" class="hover:text-primary-600">Inicio</NuxtLink>
@@ -84,7 +101,7 @@
     <!-- Description -->
     <div v-if="product.description" class="mt-12">
       <h2 class="text-xl font-bold mb-4">Descripción</h2>
-      <div class="prose max-w-none text-gray-700" v-html="product.description" />
+      <p class="text-gray-700 whitespace-pre-line">{{ product.description }}</p>
     </div>
 
     <!-- Specs -->
@@ -104,6 +121,8 @@ const { addToCart } = useCart();
 const { addProduct } = useRecentlyViewed();
 
 const product = ref<Product | null>(null);
+const loading = ref(true);
+const notFound = ref(false);
 
 const conditionLabel = computed(() => {
   const map: Record<string, string> = {
@@ -127,7 +146,9 @@ onMounted(async () => {
       addProduct(product.value);
     }
   } catch {
-    // Not found
+    notFound.value = true;
+  } finally {
+    loading.value = false;
   }
 });
 

@@ -1,5 +1,11 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-6">
+  <!-- Not found -->
+  <div v-if="notFound" class="max-w-7xl mx-auto px-4 py-16 text-center">
+    <p class="text-gray-500 text-lg">Categoria no encontrada</p>
+    <NuxtLink to="/" class="text-primary-600 hover:underline mt-4 inline-block">Volver al inicio</NuxtLink>
+  </div>
+
+  <div v-else class="max-w-7xl mx-auto px-4 py-6">
     <!-- Breadcrumb -->
     <nav class="text-sm text-gray-500 mb-4">
       <NuxtLink to="/" class="hover:text-primary-600">Inicio</NuxtLink>
@@ -31,7 +37,10 @@
           <p class="text-sm text-gray-500">{{ total }} productos</p>
           <ProductProductSort v-model="filters.sort" @update:model-value="fetchProducts()" />
         </div>
-        <ProductProductGrid :products="products" />
+        <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div v-for="i in 8" :key="i" class="h-64 bg-gray-200 rounded-lg animate-pulse" />
+        </div>
+        <ProductProductGrid v-else :products="products" />
 
         <!-- Pagination -->
         <div v-if="pages > 1" class="flex justify-center gap-2 mt-8">
@@ -61,6 +70,8 @@ const products = ref<Product[]>([]);
 const brands = ref<Brand[]>([]);
 const total = ref(0);
 const pages = ref(0);
+const loading = ref(false);
+const notFound = ref(false);
 
 const filters = reactive({
   brand: "",
@@ -72,20 +83,27 @@ const filters = reactive({
 });
 
 async function fetchProducts() {
-  const params = new URLSearchParams();
-  params.set("category_slug", route.params.slug as string);
-  params.set("page", String(filters.page));
-  params.set("page_size", "20");
-  params.set("sort", filters.sort);
-  if (filters.brand) params.set("brand_slug", filters.brand);
-  if (filters.condition) params.set("condition", filters.condition);
-  if (filters.minPrice) params.set("min_price", String(filters.minPrice));
-  if (filters.maxPrice) params.set("max_price", String(filters.maxPrice));
+  loading.value = true;
+  try {
+    const params = new URLSearchParams();
+    params.set("category_slug", route.params.slug as string);
+    params.set("page", String(filters.page));
+    params.set("page_size", "20");
+    params.set("sort", filters.sort);
+    if (filters.brand) params.set("brand_slug", filters.brand);
+    if (filters.condition) params.set("condition", filters.condition);
+    if (filters.minPrice) params.set("min_price", String(filters.minPrice));
+    if (filters.maxPrice) params.set("max_price", String(filters.maxPrice));
 
-  const data = await api<PaginatedResponse<Product>>(`/products/?${params}`);
-  products.value = data.items;
-  total.value = data.total;
-  pages.value = data.pages;
+    const data = await api<PaginatedResponse<Product>>(`/products/?${params}`);
+    products.value = data.items;
+    total.value = data.total;
+    pages.value = data.pages;
+  } catch {
+    products.value = [];
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(async () => {
@@ -98,7 +116,7 @@ onMounted(async () => {
     brands.value = b;
     await fetchProducts();
   } catch {
-    // Not found
+    notFound.value = true;
   }
 });
 

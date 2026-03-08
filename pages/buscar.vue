@@ -22,7 +22,10 @@
         <div class="flex items-center justify-between mb-4">
           <ProductProductSort v-model="filters.sort" @update:model-value="fetchResults()" />
         </div>
-        <ProductProductGrid :products="products" />
+        <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div v-for="i in 8" :key="i" class="h-64 bg-gray-200 rounded-lg animate-pulse" />
+        </div>
+        <ProductProductGrid v-else :products="products" />
 
         <div v-if="pages > 1" class="flex justify-center gap-2 mt-8">
           <button
@@ -51,6 +54,7 @@ const products = ref<Product[]>([]);
 const brands = ref<Brand[]>([]);
 const total = ref(0);
 const pages = ref(0);
+const loading = ref(false);
 
 const filters = reactive({
   brand: "",
@@ -61,18 +65,25 @@ const filters = reactive({
 
 async function fetchResults() {
   if (!searchQuery.value) return;
-  const params = new URLSearchParams();
-  params.set("search", searchQuery.value);
-  params.set("page", String(filters.page));
-  params.set("page_size", "20");
-  params.set("sort", filters.sort);
-  if (filters.brand) params.set("brand_slug", filters.brand);
-  if (filters.condition) params.set("condition", filters.condition);
+  loading.value = true;
+  try {
+    const params = new URLSearchParams();
+    params.set("search", searchQuery.value);
+    params.set("page", String(filters.page));
+    params.set("page_size", "20");
+    params.set("sort", filters.sort);
+    if (filters.brand) params.set("brand_slug", filters.brand);
+    if (filters.condition) params.set("condition", filters.condition);
 
-  const data = await api<PaginatedResponse<Product>>(`/products/?${params}`);
-  products.value = data.items;
-  total.value = data.total;
-  pages.value = data.pages;
+    const data = await api<PaginatedResponse<Product>>(`/products/?${params}`);
+    products.value = data.items;
+    total.value = data.total;
+    pages.value = data.pages;
+  } catch {
+    products.value = [];
+  } finally {
+    loading.value = false;
+  }
 }
 
 onMounted(async () => {
