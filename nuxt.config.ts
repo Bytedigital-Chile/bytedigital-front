@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:8000",
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8000",
     },
   },
   compatibilityDate: "2025-01-01",
@@ -21,6 +21,6 @@ export default defineNuxtConfig({
     },
   },
   nitro: {
-    preset: "cloudflare_module",
+    preset: process.env.NITRO_PRESET || "node-server",
   },
 });
