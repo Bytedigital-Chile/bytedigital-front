@@ -1,0 +1,140 @@
+<template>
+  <div v-if="product" class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Breadcrumb -->
+    <nav class="text-sm text-gray-500 mb-6">
+      <NuxtLink to="/" class="hover:text-primary-600">Inicio</NuxtLink>
+      <template v-if="product.categories?.length">
+        <span class="mx-2">/</span>
+        <NuxtLink
+          :to="`/categoria/${product.categories[0].slug}`"
+          class="hover:text-primary-600"
+        >
+          {{ product.categories[0].name }}
+        </NuxtLink>
+      </template>
+      <span class="mx-2">/</span>
+      <span class="text-gray-900">{{ product.name }}</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- Gallery -->
+      <ProductProductGallery :images="product.images" />
+
+      <!-- Info -->
+      <div>
+        <p v-if="product.brand" class="text-sm text-gray-500 mb-1">{{ product.brand.name }}</p>
+        <h1 class="text-2xl font-bold mb-4">{{ product.name }}</h1>
+
+        <!-- Price -->
+        <div class="mb-6">
+          <div v-if="product.sale_price && product.sale_price < product.base_price">
+            <p class="text-sm text-gray-400 line-through">{{ formatCLP(product.base_price) }}</p>
+            <p class="text-3xl font-bold text-primary-600">{{ formatCLP(product.sale_price) }}</p>
+            <span class="inline-block bg-red-100 text-red-600 text-sm font-bold px-2 py-1 rounded mt-1">
+              -{{ calcDiscount(product.base_price, product.sale_price) }}% dcto
+            </span>
+          </div>
+          <div v-else>
+            <p class="text-3xl font-bold text-gray-900">{{ formatCLP(product.base_price) }}</p>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">Precio contado</p>
+        </div>
+
+        <!-- Stock -->
+        <div class="mb-6">
+          <p v-if="product.stock > 0" class="text-green-600 font-medium">
+            En stock ({{ product.stock }} disponibles)
+          </p>
+          <p v-else class="text-red-500 font-medium">Sin stock</p>
+        </div>
+
+        <!-- Condition -->
+        <div class="mb-6">
+          <span
+            class="inline-block border rounded px-3 py-1 text-sm"
+            :class="{
+              'border-green-200 bg-green-50 text-green-700': product.condition === 'new',
+              'border-yellow-200 bg-yellow-50 text-yellow-700': product.condition === 'open_box',
+              'border-blue-200 bg-blue-50 text-blue-700': product.condition === 'refurbished',
+            }"
+          >
+            {{ conditionLabel }}
+          </span>
+        </div>
+
+        <!-- Add to cart -->
+        <button
+          class="w-full md:w-auto px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+          :disabled="product.stock <= 0"
+          @click="onAddToCart"
+        >
+          Agregar al carrito
+        </button>
+
+        <!-- Short description -->
+        <p v-if="product.short_description" class="text-gray-600 mt-6">
+          {{ product.short_description }}
+        </p>
+
+        <!-- SKU -->
+        <p v-if="product.sku" class="text-xs text-gray-400 mt-4">SKU: {{ product.sku }}</p>
+      </div>
+    </div>
+
+    <!-- Description -->
+    <div v-if="product.description" class="mt-12">
+      <h2 class="text-xl font-bold mb-4">Descripción</h2>
+      <div class="prose max-w-none text-gray-700" v-html="product.description" />
+    </div>
+
+    <!-- Specs -->
+    <div class="mt-12">
+      <ProductProductSpecs :specs="product.specs" />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import type { Product } from "~/types";
+import { calcDiscount, formatCLP } from "~/utils/format";
+
+const route = useRoute();
+const { api } = useApi();
+const { addToCart } = useCart();
+const { addProduct } = useRecentlyViewed();
+
+const product = ref<Product | null>(null);
+
+const conditionLabel = computed(() => {
+  const map: Record<string, string> = {
+    new: "Nuevo",
+    open_box: "Open Box",
+    refurbished: "Reacondicionado",
+  };
+  return map[product.value?.condition || "new"] || "Nuevo";
+});
+
+function onAddToCart() {
+  if (product.value) {
+    addToCart(product.value);
+  }
+}
+
+onMounted(async () => {
+  try {
+    product.value = await api<Product>(`/products/${route.params.slug}`);
+    if (product.value) {
+      addProduct(product.value);
+    }
+  } catch {
+    // Not found
+  }
+});
+
+useHead(() => ({
+  title: product.value ? `${product.value.name} - ByteDigital` : "Producto - ByteDigital",
+  meta: product.value?.meta_description
+    ? [{ name: "description", content: product.value.meta_description }]
+    : [],
+}));
+</script>
