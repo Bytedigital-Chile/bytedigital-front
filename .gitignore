@@ -3,3 +3,7 @@ node_modules/
 .output/
 dist/
 .env
+
+coverage/
+.DS_Store
+assets/.DS_Store

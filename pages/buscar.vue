@@ -8,24 +8,30 @@
     <div class="flex gap-8">
       <!-- Filters -->
       <aside class="hidden md:block w-64 flex-shrink-0">
-        <ProductProductFilters
+        <ProductFilters
           :brands="brands"
           :selected-brand="filters.brand"
           :selected-condition="filters.condition"
-          @update:brand="filters.brand = $event; fetchResults()"
-          @update:condition="filters.condition = $event; fetchResults()"
+          @update:brand="filters.brand = $event; filters.page = 1; fetchResults()"
+          @update:condition="filters.condition = $event; filters.page = 1; fetchResults()"
         />
       </aside>
 
       <!-- Results -->
       <div class="flex-1">
         <div class="flex items-center justify-between mb-4">
-          <ProductProductSort v-model="filters.sort" @update:model-value="fetchResults()" />
+          <ProductSort v-model="filters.sort" @update:model-value="fetchResults()" />
         </div>
         <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div v-for="i in 8" :key="i" class="h-64 bg-gray-200 rounded-lg animate-pulse" />
         </div>
-        <ProductProductGrid v-else :products="products" />
+        <template v-else>
+          <ProductGrid v-if="products.length" :products="products" />
+          <div v-else class="text-center py-12 text-gray-500">
+            <p class="text-lg mb-2">No se encontraron resultados</p>
+            <p class="text-sm">Intenta con otros términos de búsqueda</p>
+          </div>
+        </template>
 
         <div v-if="pages > 1" class="flex justify-center gap-2 mt-8">
           <button

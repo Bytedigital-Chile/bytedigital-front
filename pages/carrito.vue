@@ -35,20 +35,26 @@
             </NuxtLink>
             <p class="text-sm text-gray-500">{{ item.product.brand?.name }}</p>
             <p class="font-bold text-primary-600 mt-1">
-              {{ formatCLP(item.product.sale_price ?? item.product.base_price) }}
+              {{ formatCLP(item.unit_price || item.product.sale_price || item.product.base_price) }}
+            </p>
+            <p
+              v-if="item.product.stock < item.quantity"
+              class="text-xs text-red-500 mt-1"
+            >
+              Solo {{ item.product.stock }} disponibles
             </p>
           </div>
           <div class="flex items-center gap-2">
             <button
               class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
-              @click="updateQuantity(item.product.id, item.quantity - 1)"
+              @click="handleUpdateQuantity(item.product.id, item.quantity - 1)"
             >
               -
             </button>
             <span class="w-8 text-center">{{ item.quantity }}</span>
             <button
               class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
-              @click="updateQuantity(item.product.id, item.quantity + 1)"
+              @click="handleUpdateQuantity(item.product.id, item.quantity + 1)"
             >
               +
             </button>
@@ -56,12 +62,12 @@
           <div class="flex flex-col items-end justify-between">
             <button
               class="text-red-400 hover:text-red-600 text-sm"
-              @click="removeFromCart(item.product.id)"
+              @click="confirmRemove(item.product.id)"
             >
               Eliminar
             </button>
             <p class="font-bold">
-              {{ formatCLP((item.product.sale_price ?? item.product.base_price) * item.quantity) }}
+              {{ formatCLP((item.unit_price || item.product.sale_price || item.product.base_price) * item.quantity) }}
             </p>
           </div>
         </div>
@@ -69,9 +75,21 @@
 
       <!-- Total -->
       <div class="border-t pt-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm text-gray-600">Subtotal</span>
+          <span class="font-medium">{{ formatCLP(cartTotal) }}</span>
+        </div>
         <div class="flex justify-between items-center mb-4">
+          <span class="text-sm text-gray-600">Envío</span>
+          <span class="text-sm" :class="cartTotal >= 50000 ? 'text-green-600 font-medium' : 'text-gray-600'">
+            {{ cartTotal >= 50000 ? "Gratis" : formatCLP(3990) }}
+          </span>
+        </div>
+        <div class="flex justify-between items-center mb-6 border-t pt-4">
           <span class="text-lg font-semibold">Total</span>
-          <span class="text-2xl font-bold text-primary-600">{{ formatCLP(cartTotal) }}</span>
+          <span class="text-2xl font-bold text-primary-600">
+            {{ formatCLP(cartTotal + (cartTotal >= 50000 ? 0 : 3990)) }}
+          </span>
         </div>
         <div class="flex gap-4">
           <NuxtLink
@@ -82,6 +100,7 @@
           </NuxtLink>
           <button
             class="flex-1 bg-primary-600 text-white rounded-lg py-3 font-semibold hover:bg-primary-700"
+            @click="proceedToCheckout"
           >
             Proceder al pago
           </button>
@@ -95,6 +114,28 @@
 import { formatCLP } from "~/utils/format";
 
 const { items, removeFromCart, updateQuantity, cartTotal } = useCart();
+const { show: showToast } = useToast();
+const { isAuthenticated } = useAuth();
+
+async function confirmRemove(productId: number) {
+  if (!confirm("¿Eliminar este producto del carrito?")) return;
+  const ok = await removeFromCart(productId);
+  if (ok) showToast("Producto eliminado del carrito");
+  else showToast("Error al eliminar", "error");
+}
+
+async function handleUpdateQuantity(productId: number, quantity: number) {
+  const ok = await updateQuantity(productId, quantity);
+  if (!ok) showToast("Error al actualizar cantidad", "error");
+}
+
+function proceedToCheckout() {
+  if (isAuthenticated.value) {
+    navigateTo("/checkout");
+  } else {
+    navigateTo("/login?redirect=/checkout");
+  }
+}
 
 useHead({ title: "Carrito - ByteDigital" });
 </script>

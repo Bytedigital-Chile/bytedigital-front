@@ -6,5 +6,6 @@
       <slot />
     </main>
     <LayoutTheFooter />
+    <LayoutToastContainer />
   </div>
 </template>

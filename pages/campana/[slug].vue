@@ -22,7 +22,7 @@
     <h1 class="text-3xl font-bold mb-2">{{ campaign.name }}</h1>
     <p v-if="campaign.description" class="text-gray-600 mb-8">{{ campaign.description }}</p>
 
-    <ProductProductGrid :products="campaign.products" />
+    <ProductGrid :products="campaign.products" />
   </div>
 </template>
 

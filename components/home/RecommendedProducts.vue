@@ -1,10 +1,14 @@
 <template>
-  <section v-if="products.length" class="my-8">
-    <h2 class="text-xl font-bold mb-4">Vistos Recientemente</h2>
-    <ProductProductGrid :products="products" />
+  <section v-if="products.length" ref="target" class="my-10">
+    <HomeSectionHeader title="Vistos Recientemente" />
+    <div :class="isVisible ? 'reveal-visible' : 'reveal-hidden'">
+      <ProductGrid :products="products" />
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 const { products } = useRecentlyViewed();
+
+const { target, isVisible } = useScrollReveal();
 </script>

@@ -35,7 +35,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <!-- Gallery -->
-      <ProductProductGallery :images="product.images" />
+      <ProductGallery :images="product.images" />
 
       <!-- Info -->
       <div>
@@ -79,14 +79,23 @@
           </span>
         </div>
 
-        <!-- Add to cart -->
-        <button
-          class="w-full md:w-auto px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
-          :disabled="product.stock <= 0"
-          @click="onAddToCart"
-        >
-          Agregar al carrito
-        </button>
+        <!-- Add to cart + Wishlist -->
+        <div class="flex gap-3">
+          <button
+            class="flex-1 md:flex-none px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
+            :disabled="product.stock <= 0"
+            @click="onAddToCart"
+          >
+            Agregar al carrito
+          </button>
+          <button
+            class="px-4 py-3 border-2 rounded-lg transition-colors"
+            :class="inWishlist ? 'border-red-300 text-red-500 bg-red-50' : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500'"
+            @click="handleWishlist"
+          >
+            <Heart class="w-5 h-5" :class="inWishlist ? 'fill-current' : ''" />
+          </button>
+        </div>
 
         <!-- Short description -->
         <p v-if="product.short_description" class="text-gray-600 mt-6">
@@ -106,19 +115,23 @@
 
     <!-- Specs -->
     <div class="mt-12">
-      <ProductProductSpecs :specs="product.specs" />
+      <ProductSpecs :specs="product.specs" :attribute-values="product.attribute_values" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Heart } from "lucide-vue-next";
 import type { Product } from "~/types";
 import { calcDiscount, formatCLP } from "~/utils/format";
 
 const route = useRoute();
 const { api } = useApi();
 const { addToCart } = useCart();
+const { show: showToast } = useToast();
 const { addProduct } = useRecentlyViewed();
+const { isInWishlist, toggleWishlist } = useWishlist();
+const { isAuthenticated } = useAuth();
 
 const product = ref<Product | null>(null);
 const loading = ref(true);
@@ -133,9 +146,26 @@ const conditionLabel = computed(() => {
   return map[product.value?.condition || "new"] || "Nuevo";
 });
 
-function onAddToCart() {
+const inWishlist = computed(() => product.value ? isInWishlist(product.value.id) : false);
+
+async function onAddToCart() {
   if (product.value) {
-    addToCart(product.value);
+    const ok = await addToCart(product.value);
+    if (ok) {
+      showToast("Producto agregado al carrito");
+    } else {
+      showToast("No se pudo agregar al carrito", "error");
+    }
+  }
+}
+
+function handleWishlist() {
+  if (!isAuthenticated.value) {
+    navigateTo(`/login?redirect=${encodeURIComponent(route.fullPath)}`);
+    return;
+  }
+  if (product.value) {
+    toggleWishlist(product.value.id);
   }
 }
 

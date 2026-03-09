@@ -18,16 +18,19 @@
     <div class="flex gap-8">
       <!-- Filters sidebar -->
       <aside class="hidden md:block w-64 flex-shrink-0">
-        <ProductProductFilters
+        <ProductFilters
           :brands="brands"
           :selected-brand="filters.brand"
           :selected-condition="filters.condition"
           :min-price="filters.minPrice"
           :max-price="filters.maxPrice"
-          @update:brand="filters.brand = $event; fetchProducts()"
-          @update:condition="filters.condition = $event; fetchProducts()"
-          @update:min-price="filters.minPrice = $event; fetchProducts()"
-          @update:max-price="filters.maxPrice = $event; fetchProducts()"
+          :dynamic-filters="dynamicFilters"
+          :attr-filters="filters.attrFilters"
+          @update:brand="filters.brand = $event; filters.page = 1; fetchProducts()"
+          @update:condition="filters.condition = $event; filters.page = 1; fetchProducts()"
+          @update:min-price="filters.minPrice = $event; filters.page = 1; fetchProducts()"
+          @update:max-price="filters.maxPrice = $event; filters.page = 1; fetchProducts()"
+          @update:attr-filters="filters.attrFilters = $event; filters.page = 1; fetchProducts()"
         />
       </aside>
 
@@ -35,12 +38,12 @@
       <div class="flex-1">
         <div class="flex items-center justify-between mb-4">
           <p class="text-sm text-gray-500">{{ total }} productos</p>
-          <ProductProductSort v-model="filters.sort" @update:model-value="fetchProducts()" />
+          <ProductSort v-model="filters.sort" @update:model-value="fetchProducts()" />
         </div>
         <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           <div v-for="i in 8" :key="i" class="h-64 bg-gray-200 rounded-lg animate-pulse" />
         </div>
-        <ProductProductGrid v-else :products="products" />
+        <ProductGrid v-else :products="products" />
 
         <!-- Pagination -->
         <div v-if="pages > 1" class="flex justify-center gap-2 mt-8">
@@ -60,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Brand, Category, PaginatedResponse, Product } from "~/types";
+import type { Brand, Category, CategoryFilters, FilterDefinition, PaginatedResponse, Product } from "~/types";
 
 const route = useRoute();
 const { api } = useApi();
@@ -68,6 +71,7 @@ const { api } = useApi();
 const category = ref<Category | null>(null);
 const products = ref<Product[]>([]);
 const brands = ref<Brand[]>([]);
+const dynamicFilters = ref<FilterDefinition[]>([]);
 const total = ref(0);
 const pages = ref(0);
 const loading = ref(false);
@@ -80,6 +84,7 @@ const filters = reactive({
   maxPrice: undefined as number | undefined,
   sort: "newest",
   page: 1,
+  attrFilters: {} as Record<string, string>,
 });
 
 async function fetchProducts() {
@@ -95,6 +100,11 @@ async function fetchProducts() {
     if (filters.minPrice) params.set("min_price", String(filters.minPrice));
     if (filters.maxPrice) params.set("max_price", String(filters.maxPrice));
 
+    // Dynamic attribute filters
+    for (const [key, value] of Object.entries(filters.attrFilters)) {
+      if (value) params.set(key, value);
+    }
+
     const data = await api<PaginatedResponse<Product>>(`/products/?${params}`);
     products.value = data.items;
     total.value = data.total;
@@ -108,12 +118,14 @@ async function fetchProducts() {
 
 onMounted(async () => {
   try {
-    const [cat, b] = await Promise.all([
+    const [cat, b, filtersData] = await Promise.all([
       api<Category>(`/categories/${route.params.slug}`),
       api<Brand[]>("/brands/"),
+      api<CategoryFilters>(`/categories/${route.params.slug}/filters`).catch(() => ({ filters: [] })),
     ]);
     category.value = cat;
     brands.value = b;
+    dynamicFilters.value = filtersData.filters;
     await fetchProducts();
   } catch {
     notFound.value = true;

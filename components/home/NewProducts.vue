@@ -1,7 +1,9 @@
 <template>
-  <section v-if="products.length" class="my-8">
-    <h2 class="text-xl font-bold mb-4">Nuevos Productos</h2>
-    <ProductProductGrid :products="products" />
+  <section v-if="products.length" ref="target" class="my-10">
+    <HomeSectionHeader title="Nuevos Productos" badge="NUEVO" badge-class="bg-emerald-100 text-emerald-600" />
+    <div :class="isVisible ? 'reveal-visible' : 'reveal-hidden'">
+      <ProductGrid :products="products" />
+    </div>
   </section>
 </template>
 
@@ -9,4 +11,6 @@
 import type { Product } from "~/types";
 
 defineProps<{ products: Product[] }>();
+
+const { target, isVisible } = useScrollReveal();
 </script>
