@@ -17,12 +17,35 @@ definePageMeta({
   layout: false,
 })
 
-const { config, fetchConfig } = useSiteConfig()
+const { config } = useSiteConfig()
+const { api } = useApi()
 
-// Ensure config is loaded
-if (!config.value) {
-  await fetchConfig()
+// Poll every 5 seconds to check if maintenance is still active
+let interval: ReturnType<typeof setInterval> | null = null
+
+async function checkMaintenance() {
+  try {
+    const data = await api<{ maintenance_mode: boolean }>("/site-config/")
+    if (!data.maintenance_mode) {
+      // Maintenance is off, redirect to home
+      if (interval) clearInterval(interval)
+      await navigateTo("/", { replace: true })
+    }
+  } catch {
+    // If error, keep polling
+  }
 }
+
+onMounted(() => {
+  // Check immediately in case it was already disabled
+  checkMaintenance()
+  // Then poll every 5 seconds
+  interval = setInterval(checkMaintenance, 5000)
+})
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval)
+})
 
 const message = computed(() =>
   config.value?.maintenance_message || "Estamos mejorando el sitio. Volvemos pronto."
