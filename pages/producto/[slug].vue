@@ -82,11 +82,12 @@
         <!-- Add to cart + Wishlist -->
         <div class="flex gap-3">
           <button
-            class="flex-1 md:flex-none px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50"
-            :disabled="product.stock <= 0"
+            class="flex-1 md:flex-none px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            :disabled="product.stock <= 0 || adding"
             @click="onAddToCart"
           >
-            Agregar al carrito
+            <Loader2 v-if="adding" class="w-5 h-5 animate-spin" />
+            {{ adding ? 'Agregando...' : 'Agregar al carrito' }}
           </button>
           <button
             class="px-4 py-3 border-2 rounded-lg transition-colors"
@@ -121,7 +122,7 @@
 </template>
 
 <script setup lang="ts">
-import { Heart } from "lucide-vue-next";
+import { Heart, Loader2 } from "lucide-vue-next";
 import type { Product } from "~/types";
 import { calcDiscount, formatCLP } from "~/utils/format";
 
@@ -136,6 +137,7 @@ const { isAuthenticated } = useAuth();
 const product = ref<Product | null>(null);
 const loading = ref(true);
 const notFound = ref(false);
+const adding = ref(false);
 
 const conditionLabel = computed(() => {
   const map: Record<string, string> = {
@@ -149,12 +151,17 @@ const conditionLabel = computed(() => {
 const inWishlist = computed(() => product.value ? isInWishlist(product.value.id) : false);
 
 async function onAddToCart() {
-  if (product.value) {
-    const ok = await addToCart(product.value);
-    if (ok) {
-      showToast("Producto agregado al carrito");
-    } else {
-      showToast("No se pudo agregar al carrito", "error");
+  if (product.value && !adding.value) {
+    adding.value = true;
+    try {
+      const ok = await addToCart(product.value);
+      if (ok) {
+        showToast("Producto agregado al carrito");
+      } else {
+        showToast("No se pudo agregar al carrito", "error");
+      }
+    } finally {
+      adding.value = false;
     }
   }
 }

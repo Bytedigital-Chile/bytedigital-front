@@ -1,141 +1,191 @@
 # ByteDigital Front
 
-Storefront público de ByteDigital. Tienda e-commerce de tecnología construida con Nuxt 3, orientada al mercado chileno.
+Storefront de e-commerce para **ByteDigital**, tienda de tecnologia chilena. Aplicacion SSR construida con Nuxt 3.
 
-## Stack
+---
 
-- **Nuxt** 3.21 + **Vue** 3.5 (SSR)
-- **Tailwind CSS** 3.4 + **shadcn-nuxt** (Radix Vue)
-- **Lucide** icons
-- **VueUse** para utilidades reactivas
-- **Docker** (Node 22-slim)
+## Stack Tecnologico
 
-## Páginas
+| Tecnologia | Version | Proposito |
+|------------|---------|-----------|
+| **Nuxt** | 3.21 | Framework SSR/SSG |
+| **Vue** | 3.5 | UI reactiva |
+| **Tailwind CSS** | 3.4 | Estilos utility-first |
+| **shadcn-nuxt** | 2.4 | Componentes UI (Radix Vue) |
+| **Lucide** | 0.577 | Iconografia |
+| **VueUse** | 14.2 | Utilidades reactivas |
+| **Vitest** | 4.0 | Testing unitario |
 
-| Ruta | Archivo | Descripción |
-|------|---------|-------------|
-| `/` | `pages/index.vue` | Homepage: hero banners, categorías, ofertas, destacados, nuevos, vistos recientemente |
-| `/buscar` | `pages/buscar.vue` | Búsqueda con filtros (marca, condición, precio, orden) y paginación |
-| `/carrito` | `pages/carrito.vue` | Carrito de compras: gestión de items, subtotal |
-| `/categoria/[slug]` | `pages/categoria/[slug].vue` | Productos por categoría con filtros laterales y paginación |
-| `/campana/[slug]` | `pages/campana/[slug].vue` | Página de campaña con sus productos asociados |
-| `/producto/[slug]` | `pages/producto/[slug].vue` | Detalle de producto: galería, precio, specs, agregar al carrito |
+---
 
-## Componentes
+## Requisitos Previos
 
-### Layout
+- **Node.js** >= 18.x
+- **npm** >= 9.x
+- **API Backend** corriendo en `http://localhost:8000` (bytedigital-api)
 
-| Componente | Descripción |
-|------------|-------------|
-| `TheHeader` | Header sticky con logo, barra de búsqueda y link al carrito |
-| `TheFooter` | Footer con info de la empresa y links |
-| `CategoryNav` | Barra de navegación por categorías |
-| `SearchBar` | Input con autocompletado (debounce 300ms, max 8 resultados) |
+---
 
-### Producto
+## Setup Paso a Paso
 
-| Componente | Props | Descripción |
-|------------|-------|-------------|
-| `ProductCard` | `product` | Tarjeta de producto para grillas |
-| `ProductGrid` | `products[]` | Grilla responsiva 2-6 columnas |
-| `ProductGallery` | `images[]` | Galería de imágenes con thumbnails |
-| `ProductFilters` | `brands`, `selectedBrand`, `selectedCondition`, `minPrice`, `maxPrice` | Panel de filtros lateral |
-| `ProductSort` | `modelValue` | Dropdown de ordenamiento |
-| `ProductSpecs` | `specs` | Tabla de especificaciones técnicas |
-| `PriceDisplay` | `product` | Precio con descuento y tachado |
+### 1. Clonar repositorio
 
-### Home
-
-| Componente | Props | Descripción |
-|------------|-------|-------------|
-| `HeroBanner` | `banners[]` | Carousel auto-rotante (5s) con links |
-| `CategoryGrid` | `categories[]` | Grilla de categorías destacadas |
-| `FeaturedProducts` | `products[]` | Sección de productos destacados |
-| `OfferSection` | `offers[]` | Ofertas imperdibles |
-| `NewProducts` | `products[]` | Productos recién agregados |
-| `RecommendedProducts` | — | Productos vistos recientemente (localStorage) |
-
-### UI (shadcn-nuxt)
-
-`Button`, `Badge`, `Card`, `Input` — componentes base en `components/ui/`.
-
-## Composables
-
-| Composable | Retorna | Descripción |
-|------------|---------|-------------|
-| `useApi` | `{ api }` | Cliente HTTP con `$fetch` configurado al `NUXT_PUBLIC_API_BASE` |
-| `useCart` | `{ items, addToCart, removeFromCart, updateQuantity, clearCart, cartTotal, cartCount }` | Carrito persistido en localStorage |
-| `useSearch` | `{ query, results, loading }` | Búsqueda en tiempo real con debounce 300ms |
-| `useRecentlyViewed` | `{ products, addProduct }` | Últimos 10 productos vistos (localStorage) |
-
-## Flujo de usuario
-
-```mermaid
-graph TD
-    Home[Homepage] --> Cat[Categoría]
-    Home --> Search[Búsqueda]
-    Home --> Camp[Campaña]
-    Home --> Prod[Producto]
-    Cat --> Prod
-    Search --> Prod
-    Camp --> Prod
-    Prod --> Cart[Carrito]
-    Cart --> Checkout["Checkout (TODO)"]
+```bash
+git clone git@bitbucket.org:bytedigital/bytedigital-front.git
+cd bytedigital-front
 ```
 
-## API Endpoints consumidos
-
-```
-GET /banners/?banner_type=hero        → Hero banners
-GET /categories/                       → Navegación por categorías
-GET /categories/{slug}                 → Categoría específica
-GET /products/?search=&filters...      → Búsqueda y filtrado
-GET /products/featured                 → Productos destacados
-GET /products/new                      → Productos nuevos
-GET /products/{slug}                   → Detalle de producto
-GET /brands/                           → Listado de marcas (filtros)
-GET /offers/                           → Ofertas activas
-GET /campaigns/{slug}                  → Detalle de campaña
-```
-
-## Design System
-
-- **Colores:** Primary blue (#3b82f6), grays para secondary/background
-- **Tipografía:** System fonts via Tailwind
-- **Bordes:** `rounded-lg` (8px) por defecto
-- **Espaciado:** Escala 4px de Tailwind
-- **Breakpoints:** `md` (768px), `lg` (1024px), `xl` (1280px)
-- **Max width:** `max-w-7xl` (1280px)
-- **Dark mode:** Configurado (`class` strategy) pero no activo
-
-## Setup
+### 2. Instalar dependencias
 
 ```bash
 npm install
+```
+
+### 3. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+# Editar .env con tus valores
+```
+
+### 4. Iniciar servidor de desarrollo
+
+```bash
 npm run dev
 ```
 
-### Variables de entorno
+La aplicacion estara disponible en `http://localhost:3000`.
 
-| Variable | Default | Descripción |
-|----------|---------|-------------|
-| `NUXT_PUBLIC_API_BASE` | `http://localhost:8000` | URL base de la API |
+---
 
-## Build y deploy
+## Variables de Entorno
 
-```bash
-# Build SSR
-npm run build
+Crear archivo `.env` basado en `.env.example`:
 
-# Docker
-docker build -t bytedigital-front .
-docker run -p 3000:3000 -e NUXT_PUBLIC_API_BASE=https://api.bytedigital.cl bytedigital-front
+```env
+# URL de la API (servidor - usado en SSR)
+NUXT_API_BASE=http://localhost:8000
+
+# URL de la API (cliente - usado en browser)
+NUXT_PUBLIC_API_BASE=http://localhost:8000
+
+# Google Sign-In Client ID (opcional)
+NUXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
 ```
 
-## Estado actual
+| Variable | Default | Descripcion |
+|----------|---------|-------------|
+| `NUXT_API_BASE` | `http://localhost:8000` | URL API para SSR (server-side) |
+| `NUXT_PUBLIC_API_BASE` | `http://localhost:8000` | URL API para cliente (browser) |
+| `NUXT_PUBLIC_GOOGLE_CLIENT_ID` | - | Client ID para Google Sign-In |
+| `NITRO_PRESET` | `node-server` | Preset de deploy para Nitro |
 
-- Navegación de catálogo completa (categorías, búsqueda, filtros)
-- Carrito de compras funcional (localStorage)
-- Páginas de campaña y ofertas
-- SEO básico (`useHead` con títulos dinámicos)
-- **Pendiente:** checkout, pasarela de pago, autenticación de clientes, cuenta de usuario
+---
+
+## Comandos Principales
+
+| Comando | Descripcion |
+|---------|-------------|
+| `npm run dev` | Inicia servidor de desarrollo con hot-reload |
+| `npm run build` | Compila para produccion (SSR) |
+| `npm run generate` | Genera sitio estatico (SSG) |
+| `npm run preview` | Preview del build de produccion |
+| `npm run test` | Ejecuta tests unitarios |
+| `npm run test:watch` | Tests en modo watch |
+| `npm run test:coverage` | Tests con reporte de cobertura |
+
+---
+
+## Estructura del Proyecto
+
+```
+bytedigital-front/
+├── assets/              # Estilos globales (CSS)
+├── components/
+│   ├── home/           # Componentes de homepage
+│   ├── layout/         # Header, Footer, SearchBar
+│   ├── product/        # ProductCard, ProductGrid, Filters
+│   └── ui/             # Componentes base (shadcn)
+├── composables/         # Logica reutilizable (useAuth, useCart, etc.)
+├── layouts/             # Layout default con header/footer
+├── lib/                 # Utilidades (cn helper)
+├── middleware/          # auth, maintenance
+├── pages/               # Rutas del sitio
+├── types/               # TypeScript interfaces
+├── utils/               # Funciones helper (formatCLP)
+└── tests/               # Tests unitarios
+```
+
+---
+
+## Build y Deploy
+
+### Build SSR (produccion)
+
+```bash
+npm run build
+node .output/server/index.mjs
+```
+
+### Docker
+
+```bash
+# Build imagen
+docker build -t bytedigital-front .
+
+# Run contenedor
+docker run -p 3000:3000 \
+  -e NUXT_API_BASE=http://api:8000 \
+  -e NUXT_PUBLIC_API_BASE=https://api.bytedigital.cl \
+  bytedigital-front
+```
+
+### Con Docker Compose (recomendado)
+
+Usar el repositorio `bytedigital-devops` para orquestar todos los servicios:
+
+```bash
+cd ../bytedigital-devops
+make up
+```
+
+---
+
+## Testing
+
+```bash
+# Ejecutar todos los tests
+npm run test
+
+# Modo watch (desarrollo)
+npm run test:watch
+
+# Con cobertura
+npm run test:coverage
+```
+
+Los tests estan en `/tests/` y usan:
+- **Vitest** como test runner
+- **happy-dom** para simular el DOM
+- **@vue/test-utils** para testing de componentes
+
+---
+
+## Documentacion Tecnica
+
+Documentacion detallada disponible en [`/docs`](./docs/README.md):
+
+- [Arquitectura del proyecto](./docs/ARCHITECTURE.md)
+- [Composables](./docs/composables.md)
+- **Modulos:**
+  - [Autenticacion](./docs/modules/auth.md)
+  - [Carrito](./docs/modules/cart.md)
+  - [Checkout](./docs/modules/checkout.md)
+  - [Mi Cuenta](./docs/modules/account.md)
+  - [Catalogo](./docs/modules/catalog.md)
+
+---
+
+## Licencia
+
+Propiedad de ByteDigital SpA. Todos los derechos reservados.

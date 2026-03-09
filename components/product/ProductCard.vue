@@ -41,11 +41,13 @@
         <!-- Hover add to cart overlay -->
         <div class="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-10">
           <button
-            class="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors shadow-lg"
+            class="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold py-2.5 rounded-lg transition-colors shadow-lg disabled:opacity-50"
+            :disabled="adding"
             @click.prevent="handleAddToCart"
           >
-            <ShoppingCart class="w-4 h-4" />
-            Agregar al carro
+            <Loader2 v-if="adding" class="w-4 h-4 animate-spin" />
+            <ShoppingCart v-else class="w-4 h-4" />
+            {{ adding ? 'Agregando...' : 'Agregar al carro' }}
           </button>
         </div>
       </div>
@@ -73,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ShoppingCart, ImageOff, Heart } from "lucide-vue-next";
+import { ShoppingCart, ImageOff, Heart, Loader2 } from "lucide-vue-next";
 import type { Product } from "~/types";
 import { calcDiscount } from "~/utils/format";
 
@@ -85,13 +87,20 @@ const { isInWishlist, toggleWishlist } = useWishlist();
 const { isAuthenticated } = useAuth();
 
 const inWishlist = computed(() => isInWishlist(props.product.id));
+const adding = ref(false);
 
 async function handleAddToCart() {
-  const ok = await addToCart(props.product);
-  if (ok) {
-    showToast("Producto agregado al carrito");
-  } else {
-    showToast("No se pudo agregar al carrito", "error");
+  if (adding.value) return;
+  adding.value = true;
+  try {
+    const ok = await addToCart(props.product);
+    if (ok) {
+      showToast("Producto agregado al carrito");
+    } else {
+      showToast("No se pudo agregar al carrito", "error");
+    }
+  } finally {
+    adding.value = false;
   }
 }
 

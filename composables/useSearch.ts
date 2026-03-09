@@ -1,4 +1,4 @@
-import type { Product } from "~/types";
+import type { Product, PaginatedResponse } from "~/types";
 
 export function useSearch() {
   const query = ref("");
@@ -17,7 +17,7 @@ export function useSearch() {
     loading.value = true;
     timeout = setTimeout(async () => {
       try {
-        const data = await api<any>(`/products/?search=${encodeURIComponent(val)}&page_size=8`);
+        const data = await api<PaginatedResponse<Product>>(`/products/?search=${encodeURIComponent(val)}&page_size=8`);
         results.value = data.items;
       } catch {
         results.value = [];
