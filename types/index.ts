@@ -133,6 +133,28 @@ export interface CartItem {
   product: Product;
   quantity: number;
   unit_price?: number;
+  // Stock status fields from API
+  available_stock?: number;
+  stock_status?: "available" | "limited" | "out_of_stock" | "inactive";
+  stock_message?: string | null;
+}
+
+export interface CartSuggestion {
+  id: number;
+  name: string;
+  slug: string;
+  base_price: number;
+  sale_price: number | null;
+  image_url: string | null;
+}
+
+export interface CartResponse {
+  id: number;
+  items: CartItem[];
+  total: number;
+  has_unavailable_items: boolean;
+  unavailable_count: number;
+  suggestions: CartSuggestion[];
 }
 
 export interface CustomerUser {

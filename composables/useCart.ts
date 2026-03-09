@@ -1,11 +1,18 @@
-import type { CartItem, Product } from "~/types";
+import type { CartItem, CartResponse, CartSuggestion, Product } from "~/types";
 
 const CART_KEY = "bytedigital_cart";
 
 function _recalc(items: CartItem[], total: Ref<number>, count: Ref<number>) {
   total.value = items.reduce((sum, item) => {
+    // Only count available items
+    if (item.stock_status === "out_of_stock" || item.stock_status === "inactive") {
+      return sum;
+    }
     const price = item.unit_price || item.product.sale_price || item.product.base_price;
-    return sum + price * item.quantity;
+    const qty = item.stock_status === "limited" && item.available_stock
+      ? Math.min(item.quantity, item.available_stock)
+      : item.quantity;
+    return sum + price * qty;
   }, 0);
   count.value = items.reduce((sum, item) => sum + item.quantity, 0);
 }
@@ -16,8 +23,22 @@ export function useCart() {
   const cartCount = useState<number>("cart_count", () => 0);
   const initialized = useState<boolean>("cart_init", () => false);
 
+  // New stock-related state
+  const hasUnavailableItems = useState<boolean>("cart_has_unavailable", () => false);
+  const unavailableCount = useState<number>("cart_unavailable_count", () => 0);
+  const suggestions = useState<CartSuggestion[]>("cart_suggestions", () => []);
+
   const { api } = useApi();
   const { isAuthenticated } = useAuth();
+
+  function setCartData(cart: CartResponse) {
+    items.value = cart.items;
+    cartTotal.value = cart.total;
+    hasUnavailableItems.value = cart.has_unavailable_items;
+    unavailableCount.value = cart.unavailable_count;
+    suggestions.value = cart.suggestions;
+    cartCount.value = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  }
 
   function setItems(newItems: CartItem[]) {
     items.value = newItems;
@@ -48,8 +69,8 @@ export function useCart() {
   // ── Server helpers ───────────────────────────────────────────
   async function fetchServerCart() {
     try {
-      const cart = await api<{ items: CartItem[]; total: number }>("/account/cart/");
-      setItems(cart.items);
+      const cart = await api<CartResponse>("/account/cart/");
+      setCartData(cart);
     } catch {
       setItems([]);
     }
@@ -59,11 +80,11 @@ export function useCart() {
   async function addToCart(product: Product, quantity = 1): Promise<boolean> {
     if (isAuthenticated.value) {
       try {
-        const cart = await api<{ items: CartItem[]; total: number }>("/account/cart/items", {
+        const cart = await api<CartResponse>("/account/cart/items", {
           method: "POST",
           body: { product_id: product.id, quantity },
         });
-        setItems(cart.items);
+        setCartData(cart);
         return true;
       } catch {
         return false;
@@ -86,10 +107,10 @@ export function useCart() {
       const item = items.value.find((i) => i.product.id === productId);
       if (item?.id) {
         try {
-          const cart = await api<{ items: CartItem[]; total: number }>(`/account/cart/items/${item.id}`, {
+          const cart = await api<CartResponse>(`/account/cart/items/${item.id}`, {
             method: "DELETE",
           });
-          setItems(cart.items);
+          setCartData(cart);
           return true;
         } catch {
           return false;
@@ -112,11 +133,11 @@ export function useCart() {
       const item = items.value.find((i) => i.product.id === productId);
       if (item?.id) {
         try {
-          const cart = await api<{ items: CartItem[]; total: number }>(`/account/cart/items/${item.id}`, {
+          const cart = await api<CartResponse>(`/account/cart/items/${item.id}`, {
             method: "PUT",
             body: { quantity },
           });
-          setItems(cart.items);
+          setCartData(cart);
           return true;
         } catch {
           return false;
@@ -173,11 +194,11 @@ export function useCart() {
         quantity: i.quantity,
       }));
       try {
-        const cart = await api<{ items: CartItem[]; total: number }>("/account/cart/merge", {
+        const cart = await api<CartResponse>("/account/cart/merge", {
           method: "POST",
           body: mergePayload,
         });
-        setItems(cart.items);
+        setCartData(cart);
       } catch {
         await fetchServerCart();
       }
@@ -202,10 +223,16 @@ export function useCart() {
     items,
     cartTotal,
     cartCount,
+    // Stock status
+    hasUnavailableItems,
+    unavailableCount,
+    suggestions,
+    // Actions
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
     mergeCart,
+    fetchServerCart,
   };
 }

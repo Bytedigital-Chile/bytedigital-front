@@ -3,9 +3,7 @@
     <h1 class="text-2xl font-bold mb-6">Carrito de compras</h1>
 
     <div v-if="items.length === 0" class="text-center py-16">
-      <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z" />
-      </svg>
+      <ShoppingCart class="w-16 h-16 mx-auto text-gray-300 mb-4" />
       <p class="text-gray-500 mb-4">Tu carrito está vacío</p>
       <NuxtLink
         to="/"
@@ -16,44 +14,80 @@
     </div>
 
     <div v-else>
+      <!-- Unavailable items warning -->
+      <div
+        v-if="hasUnavailableItems"
+        class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6"
+      >
+        <div class="flex items-start gap-3">
+          <AlertTriangle class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" />
+          <div>
+            <p class="font-medium text-amber-800">
+              {{ unavailableCount === 1 ? 'Un producto tiene' : `${unavailableCount} productos tienen` }} problemas de stock
+            </p>
+            <p class="text-sm text-amber-700 mt-1">
+              Los productos marcados en rojo no están disponibles o tienen stock limitado.
+              Puedes eliminarlos o ajustar las cantidades para continuar con tu compra.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Items -->
       <div class="space-y-4 mb-8">
         <div
           v-for="item in items"
           :key="item.product.id"
           class="flex gap-4 border rounded-lg p-4 bg-white"
+          :class="{
+            'border-red-300 bg-red-50': item.stock_status === 'out_of_stock' || item.stock_status === 'inactive',
+            'border-amber-300 bg-amber-50': item.stock_status === 'limited'
+          }"
         >
           <img
             v-if="item.product.images?.[0]"
             :src="item.product.images[0].url"
             :alt="item.product.name"
             class="w-20 h-20 object-contain rounded"
+            :class="{ 'opacity-50': item.stock_status === 'out_of_stock' || item.stock_status === 'inactive' }"
           />
+          <div v-else class="w-20 h-20 bg-gray-100 rounded flex items-center justify-center">
+            <ImageOff class="w-8 h-8 text-gray-400" />
+          </div>
           <div class="flex-1 min-w-0">
-            <NuxtLink :to="`/producto/${item.product.slug}`" class="font-medium hover:text-primary-600 line-clamp-2">
+            <NuxtLink
+              :to="`/producto/${item.product.slug}`"
+              class="font-medium hover:text-primary-600 line-clamp-2"
+              :class="{ 'text-gray-400': item.stock_status === 'out_of_stock' || item.stock_status === 'inactive' }"
+            >
               {{ item.product.name }}
             </NuxtLink>
             <p class="text-sm text-gray-500">{{ item.product.brand?.name }}</p>
-            <p class="font-bold text-primary-600 mt-1">
+            <p
+              class="font-bold mt-1"
+              :class="item.stock_status === 'out_of_stock' || item.stock_status === 'inactive' ? 'text-gray-400' : 'text-primary-600'"
+            >
               {{ formatCLP(item.unit_price || item.product.sale_price || item.product.base_price) }}
             </p>
-            <p
-              v-if="item.product.stock < item.quantity"
-              class="text-xs text-red-500 mt-1"
-            >
-              Solo {{ item.product.stock }} disponibles
+
+            <!-- Stock warning message -->
+            <p v-if="item.stock_message" class="text-xs mt-1" :class="getStockMessageClass(item.stock_status)">
+              <AlertCircle class="w-3 h-3 inline mr-1" />
+              {{ item.stock_message }}
             </p>
           </div>
           <div class="flex items-center gap-2">
             <button
-              class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
+              class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="item.stock_status === 'out_of_stock' || item.stock_status === 'inactive'"
               @click="handleUpdateQuantity(item.product.id, item.quantity - 1)"
             >
               -
             </button>
             <span class="w-8 text-center">{{ item.quantity }}</span>
             <button
-              class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100"
+              class="w-8 h-8 border rounded flex items-center justify-center hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="item.stock_status === 'out_of_stock' || item.stock_status === 'inactive' || (item.available_stock && item.quantity >= item.available_stock)"
               @click="handleUpdateQuantity(item.product.id, item.quantity + 1)"
             >
               +
@@ -66,7 +100,7 @@
             >
               Eliminar
             </button>
-            <p class="font-bold">
+            <p class="font-bold" :class="{ 'text-gray-400': item.stock_status === 'out_of_stock' || item.stock_status === 'inactive' }">
               {{ formatCLP((item.unit_price || item.product.sale_price || item.product.base_price) * item.quantity) }}
             </p>
           </div>
@@ -99,11 +133,39 @@
             Seguir comprando
           </NuxtLink>
           <button
-            class="flex-1 bg-primary-600 text-white rounded-lg py-3 font-semibold hover:bg-primary-700"
+            class="flex-1 bg-primary-600 text-white rounded-lg py-3 font-semibold hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            :disabled="hasUnavailableItems || availableItemsCount === 0"
             @click="proceedToCheckout"
           >
-            Proceder al pago
+            {{ hasUnavailableItems ? 'Resuelve los problemas para continuar' : 'Proceder al pago' }}
           </button>
+        </div>
+      </div>
+
+      <!-- Suggestions when there are unavailable items -->
+      <div v-if="hasUnavailableItems && suggestions.length > 0" class="mt-10">
+        <h2 class="text-lg font-semibold mb-4">Te puede interesar</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <NuxtLink
+            v-for="product in suggestions"
+            :key="product.id"
+            :to="`/producto/${product.slug}`"
+            class="border rounded-lg p-3 hover:shadow-md transition-shadow bg-white"
+          >
+            <img
+              v-if="product.image_url"
+              :src="product.image_url"
+              :alt="product.name"
+              class="w-full h-24 object-contain mb-2"
+            />
+            <div v-else class="w-full h-24 bg-gray-100 rounded flex items-center justify-center mb-2">
+              <ImageOff class="w-6 h-6 text-gray-400" />
+            </div>
+            <p class="text-sm font-medium line-clamp-2 mb-1">{{ product.name }}</p>
+            <p class="text-primary-600 font-bold text-sm">
+              {{ formatCLP(product.sale_price || product.base_price) }}
+            </p>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -111,11 +173,30 @@
 </template>
 
 <script setup lang="ts">
+import { ShoppingCart, AlertTriangle, AlertCircle, ImageOff } from "lucide-vue-next";
 import { formatCLP } from "~/utils/format";
 
-const { items, removeFromCart, updateQuantity, cartTotal } = useCart();
+const {
+  items,
+  removeFromCart,
+  updateQuantity,
+  cartTotal,
+  hasUnavailableItems,
+  unavailableCount,
+  suggestions,
+} = useCart();
 const { show: showToast } = useToast();
 const { isAuthenticated } = useAuth();
+
+const availableItemsCount = computed(() =>
+  items.value.filter((i) => i.stock_status === "available" || i.stock_status === "limited").length
+);
+
+function getStockMessageClass(status: string | undefined) {
+  if (status === "out_of_stock" || status === "inactive") return "text-red-600";
+  if (status === "limited") return "text-amber-600";
+  return "text-gray-500";
+}
 
 async function confirmRemove(productId: number) {
   if (!confirm("¿Eliminar este producto del carrito?")) return;
@@ -130,6 +211,10 @@ async function handleUpdateQuantity(productId: number, quantity: number) {
 }
 
 function proceedToCheckout() {
+  if (hasUnavailableItems.value) {
+    showToast("Resuelve los problemas de stock antes de continuar", "error");
+    return;
+  }
   if (isAuthenticated.value) {
     navigateTo("/checkout");
   } else {
