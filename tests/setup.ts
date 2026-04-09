@@ -26,6 +26,12 @@ const stateStore = new Map<string, any>();
   },
 };
 
+// Mock useCookie (Nuxt auto-import)
+(globalThis as any).useCookie = (_name: string, _opts?: any) => ref(null);
+
+// Mock navigateTo (Nuxt auto-import)
+(globalThis as any).navigateTo = vi.fn();
+
 // Mock useApi (Nuxt auto-import used by useSearch and other composables)
 (globalThis as any).useApi = () => {
   const config = (globalThis as any).useRuntimeConfig();
@@ -34,6 +40,19 @@ const stateStore = new Map<string, any>();
   });
   return { api };
 };
+
+// Mock useAuth (Nuxt auto-import used by useCart and other composables)
+(globalThis as any).useAuth = () => ({
+  token: ref(null),
+  user: ref(null),
+  isAuthenticated: computed(() => false),
+  login: vi.fn(),
+  register: vi.fn(),
+  resendVerification: vi.fn(),
+  loginWithGoogle: vi.fn(),
+  fetchUser: vi.fn(),
+  logout: vi.fn(),
+});
 
 // Expose Vue reactivity as globals (Nuxt auto-imports these)
 (globalThis as any).ref = ref;

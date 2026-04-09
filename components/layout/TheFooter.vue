@@ -76,8 +76,8 @@
           <ul class="space-y-2.5 text-sm">
             <li><NuxtLink to="/" class="hover:text-white transition-colors">Inicio</NuxtLink></li>
             <li><NuxtLink to="/buscar" class="hover:text-white transition-colors">Productos</NuxtLink></li>
-            <li><a href="#" class="hover:text-white transition-colors">Sobre nosotros</a></li>
-            <li><a href="#" class="hover:text-white transition-colors">Términos y condiciones</a></li>
+            <li><NuxtLink to="/terminos-condiciones" class="hover:text-white transition-colors">Términos y condiciones</NuxtLink></li>
+            <li><NuxtLink to="/politica-privacidad" class="hover:text-white transition-colors">Política de privacidad</NuxtLink></li>
           </ul>
         </div>
 

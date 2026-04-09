@@ -20,9 +20,9 @@ describe("useApi", () => {
 
   it("creates $fetch with the correct baseURL from runtime config", () => {
     useApi();
-    expect((globalThis as any).$fetch.create).toHaveBeenCalledWith({
-      baseURL: "http://localhost:8000",
-    });
+    expect((globalThis as any).$fetch.create).toHaveBeenCalledWith(
+      expect.objectContaining({ baseURL: "http://localhost:8000" }),
+    );
   });
 
   it("uses the public.apiBase value from runtime config", () => {
@@ -34,9 +34,9 @@ describe("useApi", () => {
 
     useApi();
 
-    expect((globalThis as any).$fetch.create).toHaveBeenCalledWith({
-      baseURL: "https://custom-api.example.com",
-    });
+    expect((globalThis as any).$fetch.create).toHaveBeenCalledWith(
+      expect.objectContaining({ baseURL: "https://custom-api.example.com" }),
+    );
 
     // Restore
     (globalThis as any).useRuntimeConfig = original;
