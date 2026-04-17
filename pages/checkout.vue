@@ -15,29 +15,98 @@
         <label
           v-for="addr in addresses"
           :key="addr.id"
-          class="flex items-start gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
-          :class="selectedAddressId === addr.id ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'"
+          class="flex items-start gap-3 border rounded-lg p-4 transition-colors"
+          :class="[
+            selectedAddressId === addr.id ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300',
+            !isAddressDeliverable(addr) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+          ]"
         >
           <input
             v-model="selectedAddressId"
             type="radio"
             :value="addr.id"
+            :disabled="!isAddressDeliverable(addr)"
             class="mt-1"
           />
-          <div>
+          <div class="flex-1">
             <p class="font-medium">{{ addr.label }}</p>
             <p class="text-sm text-gray-600">
               {{ addr.street }} {{ addr.number }}{{ addr.apartment ? `, Depto ${addr.apartment}` : "" }}
             </p>
             <p class="text-sm text-gray-600">{{ addr.comuna }}, {{ addr.region }}</p>
+            <p v-if="addrShipping[addr.id] && !addrShipping[addr.id].is_deliverable" class="text-xs text-red-600 mt-1">
+              ⚠ No despachamos a esta comuna
+            </p>
+            <p
+              v-else-if="addrShipping[addr.id]"
+              class="text-xs mt-1"
+              :class="addrShipping[addr.id].free_shipping_applied ? 'text-green-600' : 'text-gray-500'"
+            >
+              Envío: {{
+                addrShipping[addr.id].free_shipping_applied
+                  ? "Gratis"
+                  : formatCLP(addrShipping[addr.id].price)
+              }}
+            </p>
           </div>
         </label>
       </div>
     </div>
 
-    <!-- Step 2: Order summary -->
+    <!-- Step 2: Billing document -->
     <div class="mb-8">
-      <h2 class="text-lg font-semibold mb-4">2. Resumen del pedido</h2>
+      <h2 class="text-lg font-semibold mb-4">2. Documento tributario</h2>
+      <div class="space-y-4">
+        <div class="flex gap-6">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input v-model="billing.document_type" type="radio" value="boleta" />
+            <span>Boleta</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input v-model="billing.document_type" type="radio" value="factura" />
+            <span>Factura</span>
+          </label>
+        </div>
+
+        <div v-if="billing.document_type === 'factura'" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div class="sm:col-span-1">
+            <input
+              v-model="billing.rut"
+              placeholder="RUT (12.345.678-9)"
+              :class="{ 'border-red-500': rutError }"
+              class="w-full border rounded-lg px-3 py-2"
+              @blur="validateRut"
+            />
+            <p v-if="rutError" class="text-xs text-red-500 mt-1">{{ rutError }}</p>
+          </div>
+          <input
+            v-model="billing.razon_social"
+            placeholder="Razón Social"
+            class="w-full border rounded-lg px-3 py-2"
+          />
+          <input
+            v-model="billing.giro"
+            placeholder="Giro"
+            class="w-full border rounded-lg px-3 py-2"
+          />
+          <input
+            v-model="billing.address"
+            placeholder="Dirección de facturación"
+            class="w-full border rounded-lg px-3 py-2"
+          />
+          <input
+            v-model="billing.email"
+            type="email"
+            placeholder="Email facturación (opcional)"
+            class="w-full border rounded-lg px-3 py-2 sm:col-span-2"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Order summary -->
+    <div class="mb-8">
+      <h2 class="text-lg font-semibold mb-4">3. Resumen del pedido</h2>
       <div class="border rounded-lg overflow-hidden">
         <div
           v-for="item in cartItems"
@@ -65,113 +134,270 @@
         </div>
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">Envío</span>
-          <span :class="cartTotal >= 50000 ? 'text-green-600' : ''">
-            {{ cartTotal >= 50000 ? "Gratis" : formatCLP(3990) }}
+          <span
+            v-if="activeShipping && activeShipping.free_shipping_applied"
+            class="text-green-600"
+          >
+            Gratis
           </span>
+          <span v-else-if="activeShipping">{{ formatCLP(activeShipping.price) }}</span>
+          <span v-else class="text-gray-400">—</span>
         </div>
         <div class="flex justify-between font-bold text-lg border-t pt-2">
           <span>Total</span>
           <span class="text-primary-600">
-            {{ formatCLP(cartTotal + (cartTotal >= 50000 ? 0 : 3990)) }}
+            {{ formatCLP(cartTotal + (activeShipping && activeShipping.is_deliverable ? activeShipping.price : 0)) }}
           </span>
         </div>
       </div>
     </div>
 
-    <!-- Step 3: Payment -->
-    <div>
-      <h2 class="text-lg font-semibold mb-4">3. Pagar</h2>
-
-      <div v-if="gateways.length === 0 && !loadingGateways" class="border rounded-lg p-4 text-center text-gray-500">
-        <p>No hay métodos de pago disponibles en este momento</p>
+    <!-- Step 4: Payment method -->
+    <div class="mb-8">
+      <h2 class="text-lg font-semibold mb-4">4. Método de pago</h2>
+      <div class="space-y-3">
+        <label class="flex items-center gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
+               :class="paymentMethod === 'flow' ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'">
+          <input v-model="paymentMethod" type="radio" value="flow" />
+          <div class="flex-1">
+            <p class="font-medium">Tarjeta (Flow)</p>
+            <p class="text-xs text-gray-500">
+              Webpay, tarjetas de crédito y débito vía Flow.cl
+            </p>
+          </div>
+        </label>
+        <label class="flex items-center gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
+               :class="paymentMethod === 'bank_transfer' ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'">
+          <input v-model="paymentMethod" type="radio" value="bank_transfer" />
+          <div class="flex-1">
+            <p class="font-medium">Transferencia bancaria</p>
+            <p class="text-xs text-gray-500">
+              Te mostraremos los datos al confirmar el pedido.
+            </p>
+          </div>
+        </label>
       </div>
 
-      <div v-else class="space-y-3">
-        <button
-          v-for="gw in gateways"
-          :key="gw.slug"
-          class="w-full border-2 rounded-lg p-4 text-left font-semibold hover:border-primary-500 transition-colors disabled:opacity-50"
-          :disabled="processing"
-          @click="pay(gw.slug)"
-        >
-          {{ gw.name }}
-        </button>
+      <div v-if="paymentMethod === 'bank_transfer'" class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm">
+        <p class="font-medium mb-1">Pago por transferencia manual</p>
+        <p class="text-gray-700">
+          Al confirmar, te mostraremos los datos bancarios y el monto exacto.
+          Procesamos tu pedido al recibir el pago.
+        </p>
       </div>
+    </div>
 
-      <p v-if="error" class="text-red-500 text-sm mt-4">{{ error }}</p>
-      <p v-if="processing" class="text-sm text-gray-500 mt-4">Procesando tu pedido...</p>
+    <!-- Submit -->
+    <div class="flex items-center justify-between border-t pt-6">
+      <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
+      <div class="flex-1" />
+      <button
+        class="bg-primary-600 text-white rounded-lg px-8 py-3 font-semibold hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        :disabled="!canSubmit || processing"
+        @click="submitCheckout"
+      >
+        {{ processing ? "Procesando..." : submitLabel }}
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { CustomerAddress, PaymentGatewayPublic } from "~/types";
+import type { CustomerAddress } from "~/types";
+import type { ShippingQuote } from "~/composables/useShipping";
 import { formatCLP } from "~/utils/format";
 
 definePageMeta({ middleware: "auth" });
 
 const { api } = useApi();
 const { items: cartItems, cartTotal } = useCart();
+const { calculate } = useShipping();
 
 const addresses = ref<CustomerAddress[]>([]);
 const selectedAddressId = ref<number | null>(null);
-const gateways = ref<PaymentGatewayPublic[]>([]);
-const loadingGateways = ref(true);
 const processing = ref(false);
 const error = ref("");
 
-onMounted(async () => {
-  const [addrs, gws] = await Promise.all([
-    api<CustomerAddress[]>("/account/addresses").catch(() => []),
-    api<PaymentGatewayPublic[]>("/payment-gateways/active").catch(() => []),
-  ]);
-  addresses.value = addrs;
-  gateways.value = gws;
-  loadingGateways.value = false;
+// Shipping quote per address (resolved by comuna name → comuna_id server-side)
+// We query the per-comuna shipping endpoint for each address
+const addrShipping = ref<Record<number, ShippingQuote>>({});
 
-  // Auto-select default address
-  const defaultAddr = addrs.find((a) => a.is_default);
-  if (defaultAddr) selectedAddressId.value = defaultAddr.id;
-  else if (addrs.length > 0) selectedAddressId.value = addrs[0].id;
+async function loadShippingForAddress(addr: CustomerAddress) {
+  try {
+    // Resolve comuna by name via /geography/regions/{id}/comunas would need region lookup;
+    // simpler: just try matching from loaded regions+comunas. But to keep it simple, use a
+    // dedicated resolver endpoint would be ideal. For now: look up all regions+comunas by
+    // name (backend recalculates on checkout anyway).
+    const regions = await api<{ id: number; name: string }[]>("/geography/regions");
+    const region = regions.find(
+      (r) => r.name.toLowerCase() === addr.region.toLowerCase(),
+    );
+    if (!region) return;
+    const comunas = await api<{ id: number; name: string }[]>(
+      `/geography/regions/${region.id}/comunas`,
+    );
+    const comuna = comunas.find(
+      (c) => c.name.toLowerCase() === addr.comuna.toLowerCase(),
+    );
+    if (!comuna) return;
+    const quote = await calculate(comuna.id, cartTotal.value);
+    addrShipping.value[addr.id] = quote;
+  } catch {
+    // silent — if calculation fails, the address shows without shipping estimate
+  }
+}
+
+function isAddressDeliverable(addr: CustomerAddress): boolean {
+  const q = addrShipping.value[addr.id];
+  return !q || q.is_deliverable;
+}
+
+const activeShipping = computed(() => {
+  if (!selectedAddressId.value) return null;
+  return addrShipping.value[selectedAddressId.value] || null;
 });
 
-async function pay(gatewaySlug: string) {
-  if (!selectedAddressId.value) {
-    error.value = "Selecciona una dirección de envío";
-    return;
-  }
-  if (cartItems.value.length === 0) {
-    error.value = "Tu carrito está vacío";
-    return;
-  }
+// Billing
+const billing = reactive<{
+  document_type: "boleta" | "factura";
+  rut: string;
+  razon_social: string;
+  giro: string;
+  address: string;
+  email: string;
+}>({
+  document_type: "boleta",
+  rut: "",
+  razon_social: "",
+  giro: "",
+  address: "",
+  email: "",
+});
+const rutError = ref<string | null>(null);
 
+function validateRut() {
+  const raw = billing.rut.replace(/\./g, "").replace(/\s/g, "").toUpperCase();
+  if (!raw) {
+    rutError.value = null;
+    return true;
+  }
+  if (!/^\d{1,8}-[\dK]$/.test(raw)) {
+    rutError.value = "Formato RUT inválido (ej: 12345678-9)";
+    return false;
+  }
+  const [body, dv] = raw.split("-");
+  let s = 0;
+  let factor = 2;
+  for (const ch of [...body].reverse()) {
+    s += parseInt(ch) * factor;
+    factor = factor === 7 ? 2 : factor + 1;
+  }
+  const expected = 11 - (s % 11);
+  const expectedDv = expected === 11 ? "0" : expected === 10 ? "K" : String(expected);
+  if (dv !== expectedDv) {
+    rutError.value = "Dígito verificador inválido";
+    return false;
+  }
+  rutError.value = null;
+  return true;
+}
+
+// Payment
+const paymentMethod = ref<"flow" | "bank_transfer">("flow");
+
+const canSubmit = computed(() => {
+  if (!selectedAddressId.value) return false;
+  if (cartItems.value.length === 0) return false;
+  if (activeShipping.value && !activeShipping.value.is_deliverable) return false;
+  if (billing.document_type === "factura") {
+    if (rutError.value) return false;
+    if (!billing.rut || !billing.razon_social || !billing.giro || !billing.address) {
+      return false;
+    }
+  }
+  return true;
+});
+
+const submitLabel = computed(() => {
+  return paymentMethod.value === "flow" ? "Pagar con tarjeta" : "Continuar con transferencia";
+});
+
+async function submitCheckout() {
+  if (!canSubmit.value) return;
+  if (billing.document_type === "factura" && !validateRut()) {
+    error.value = "Corrige los datos de facturación";
+    return;
+  }
   processing.value = true;
   error.value = "";
 
   try {
-    // Create order
-    const order = await api<{ order_number: string }>("/account/orders/checkout", {
-      method: "POST",
-      body: { address_id: selectedAddressId.value },
-    });
+    const payload: any = {
+      address_id: selectedAddressId.value,
+      billing: {
+        document_type: billing.document_type,
+        ...(billing.document_type === "factura"
+          ? {
+              rut: billing.rut,
+              razon_social: billing.razon_social,
+              giro: billing.giro,
+              address: billing.address,
+              email: billing.email || undefined,
+            }
+          : {}),
+      },
+      payment_method: paymentMethod.value,
+    };
 
-    if (gatewaySlug === "flow") {
-      // Create Flow payment
+    const order = await api<{
+      id: number;
+      order_number: string;
+      bank_transfer_info: Record<string, string> | null;
+      payment_method: string;
+    }>("/account/orders/checkout", { method: "POST", body: payload });
+
+    if (paymentMethod.value === "flow") {
       const payment = await api<{ redirect_url: string }>("/payments/create-flow", {
         method: "POST",
         body: { order_number: order.order_number },
       });
-      // Redirect to Flow
       window.location.href = payment.redirect_url;
     } else {
-      // Future gateways - redirect to order page
-      navigateTo(`/mi-cuenta/compras/${order.order_number}`);
+      // Bank transfer — go to confirmation page
+      await navigateTo(`/pedido/${order.order_number}/transferencia`);
     }
   } catch (e: any) {
-    error.value = e.data?.detail || "Error al procesar el pedido";
+    const detail = e.data?.detail;
+    if (detail && typeof detail === "object" && detail.code) {
+      if (detail.code === "comuna_not_deliverable") {
+        error.value = `Ya no despachamos a ${detail.comuna}. Elige otra dirección.`;
+      } else if (detail.code === "rut_invalid") {
+        error.value = "RUT inválido";
+      } else if (detail.code === "billing_incomplete") {
+        error.value = "Completa los datos de facturación";
+      } else if (detail.code === "bank_transfer_not_configured") {
+        error.value = "Transferencia no disponible en este momento";
+      } else {
+        error.value = detail.message || "Error al procesar el pedido";
+      }
+    } else {
+      error.value = detail || "Error al procesar el pedido";
+    }
     processing.value = false;
   }
 }
+
+onMounted(async () => {
+  const addrs = await api<CustomerAddress[]>("/account/addresses").catch(() => []);
+  addresses.value = addrs;
+
+  const defaultAddr = addrs.find((a) => a.is_default);
+  if (defaultAddr) selectedAddressId.value = defaultAddr.id;
+  else if (addrs.length > 0) selectedAddressId.value = addrs[0].id;
+
+  // Load shipping quotes for each address in parallel
+  await Promise.all(addrs.map(loadShippingForAddress));
+});
 
 useHead({ title: "Checkout - ByteDigital" });
 </script>
