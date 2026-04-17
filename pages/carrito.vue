@@ -111,7 +111,7 @@
       <div class="border-t pt-4">
         <!-- Shipping calculator -->
         <div class="mb-4">
-          <ShippingCalculator :subtotal="cartTotal" @quote="onShippingQuote" @clear="onShippingClear" />
+          <ProductShippingCalculator :subtotal="cartTotal" @quote="onShippingQuote" @clear="onShippingClear" />
         </div>
 
         <div class="flex justify-between items-center mb-2">

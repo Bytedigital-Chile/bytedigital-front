@@ -81,7 +81,7 @@
 
         <!-- Shipping calculator -->
         <div class="my-4">
-          <ShippingCalculator :subtotal="product.base_price" />
+          <ProductShippingCalculator :subtotal="product.base_price" />
         </div>
 
         <!-- Add to cart + Wishlist -->
