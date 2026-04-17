@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- Promotional bar -->
-    <div class="bg-primary-600 text-white text-xs py-1.5">
+    <!-- Promotional bar: solo visible en home -->
+    <div v-if="isHome" class="bg-primary-600 text-white text-xs py-1.5">
       <div class="max-w-7xl mx-auto px-4 flex items-center justify-center gap-6 md:gap-8">
         <span class="flex items-center gap-1.5">
           <Truck class="w-3.5 h-3.5" />
@@ -128,7 +128,9 @@ import { formatCLP } from "~/utils/format";
 
 const { cartTotal, cartCount } = useCart();
 const { user, isAuthenticated, logout } = useAuth();
+const route = useRoute();
 
+const isHome = computed(() => route.path === "/");
 const scrolled = ref(false);
 const showUserMenu = ref(false);
 const userMenuRef = ref<HTMLElement | null>(null);

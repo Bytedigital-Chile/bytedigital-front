@@ -32,7 +32,8 @@
         </div>
       </div>
 
-      <HomeCategoryGrid :categories="categories" />
+      <!-- Categorías ocultas a pedido del cliente (17-04-2026). Mantener el código para reactivar. -->
+      <!-- <HomeCategoryGrid :categories="categories" /> -->
       <HomeOfferSection :offers="offers" />
       <HomeFeaturedProducts :products="featured" />
       <HomeNewProducts :products="newProducts" />

@@ -1,6 +1,6 @@
 <template>
   <div v-if="banners.length" class="relative overflow-hidden rounded-xl shadow-lg">
-    <div class="relative h-72 md:h-[500px]">
+    <div class="relative h-56 md:h-80 lg:h-[360px]">
       <!-- Slides with crossfade -->
       <template v-for="(banner, idx) in banners" :key="banner.id">
         <div
