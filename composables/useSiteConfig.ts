@@ -3,6 +3,7 @@ interface SiteConfig {
   maintenance_mode: boolean
   maintenance_message: string | null
   whatsapp_number: string | null
+  free_shipping_threshold: number | null
 }
 
 export function useSiteConfig() {
@@ -22,5 +23,7 @@ export function useSiteConfig() {
     }
   }
 
-  return { config, loading, fetchConfig }
+  const freeShippingThreshold = computed(() => config.value?.free_shipping_threshold ?? null)
+
+  return { config, loading, fetchConfig, freeShippingThreshold }
 }
