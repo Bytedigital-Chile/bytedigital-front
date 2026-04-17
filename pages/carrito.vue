@@ -109,20 +109,40 @@
 
       <!-- Total -->
       <div class="border-t pt-4">
+        <!-- Shipping calculator -->
+        <div class="mb-4">
+          <ShippingCalculator :subtotal="cartTotal" @quote="onShippingQuote" @clear="onShippingClear" />
+        </div>
+
         <div class="flex justify-between items-center mb-2">
           <span class="text-sm text-gray-600">Subtotal</span>
           <span class="font-medium">{{ formatCLP(cartTotal) }}</span>
         </div>
         <div class="flex justify-between items-center mb-4">
           <span class="text-sm text-gray-600">Envío</span>
-          <span class="text-sm" :class="cartTotal >= 50000 ? 'text-green-600 font-medium' : 'text-gray-600'">
-            {{ cartTotal >= 50000 ? "Gratis" : formatCLP(3990) }}
+          <span
+            v-if="shippingQuote && !shippingQuote.is_deliverable"
+            class="text-sm text-red-600 font-medium"
+          >
+            No despacha
+          </span>
+          <span
+            v-else-if="shippingQuote && shippingQuote.free_shipping_applied"
+            class="text-sm text-green-600 font-medium"
+          >
+            Gratis
+          </span>
+          <span v-else-if="shippingQuote" class="text-sm">
+            {{ formatCLP(shippingQuote.price) }}
+          </span>
+          <span v-else class="text-sm text-gray-400">
+            Elige tu comuna
           </span>
         </div>
         <div class="flex justify-between items-center mb-6 border-t pt-4">
           <span class="text-lg font-semibold">Total</span>
           <span class="text-2xl font-bold text-primary-600">
-            {{ formatCLP(cartTotal + (cartTotal >= 50000 ? 0 : 3990)) }}
+            {{ formatCLP(cartTotal + (shippingQuote && shippingQuote.is_deliverable ? shippingQuote.price : 0)) }}
           </span>
         </div>
         <div class="flex gap-4">
@@ -134,10 +154,10 @@
           </NuxtLink>
           <button
             class="flex-1 bg-primary-600 text-white rounded-lg py-3 font-semibold hover:bg-primary-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-            :disabled="hasUnavailableItems || availableItemsCount === 0"
+            :disabled="checkoutDisabled"
             @click="proceedToCheckout"
           >
-            {{ hasUnavailableItems ? 'Resuelve los problemas para continuar' : 'Proceder al pago' }}
+            {{ checkoutButtonLabel }}
           </button>
         </div>
       </div>
@@ -173,6 +193,7 @@
 </template>
 
 <script setup lang="ts">
+import type { ShippingQuote } from "~/composables/useShipping";
 import { ShoppingCart, AlertTriangle, AlertCircle, ImageOff } from "lucide-vue-next";
 import { formatCLP } from "~/utils/format";
 
@@ -187,6 +208,29 @@ const {
 } = useCart();
 const { show: showToast } = useToast();
 const { isAuthenticated } = useAuth();
+
+const shippingQuote = ref<ShippingQuote | null>(null);
+function onShippingQuote(q: ShippingQuote) {
+  shippingQuote.value = q;
+}
+function onShippingClear() {
+  shippingQuote.value = null;
+}
+
+const checkoutDisabled = computed(() => {
+  if (hasUnavailableItems.value) return true;
+  if (availableItemsCount.value === 0) return true;
+  if (shippingQuote.value && !shippingQuote.value.is_deliverable) return true;
+  return false;
+});
+
+const checkoutButtonLabel = computed(() => {
+  if (hasUnavailableItems.value) return "Resuelve los problemas para continuar";
+  if (shippingQuote.value && !shippingQuote.value.is_deliverable) {
+    return "Elige una comuna que despachamos";
+  }
+  return "Proceder al pago";
+});
 
 const availableItemsCount = computed(() =>
   items.value.filter((i) => i.stock_status === "available" || i.stock_status === "limited").length

@@ -79,6 +79,11 @@
           </span>
         </div>
 
+        <!-- Shipping calculator -->
+        <div class="my-4">
+          <ShippingCalculator :subtotal="product.base_price" />
+        </div>
+
         <!-- Add to cart + Wishlist -->
         <div class="flex gap-3">
           <button
