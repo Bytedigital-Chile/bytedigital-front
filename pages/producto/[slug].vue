@@ -84,11 +84,19 @@
           <ProductShippingCalculator :subtotal="product.base_price" />
         </div>
 
-        <!-- Add to cart + Wishlist -->
-        <div class="flex gap-3">
+        <!-- Buy now + Add to cart + Wishlist -->
+        <div class="flex flex-col sm:flex-row gap-3">
           <button
-            class="flex-1 md:flex-none px-8 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            :disabled="product.stock <= 0 || adding"
+            class="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            :disabled="product.stock <= 0 || buyingNow || adding"
+            @click="onBuyNow"
+          >
+            <Loader2 v-if="buyingNow" class="w-5 h-5 animate-spin" />
+            {{ buyingNow ? 'Procesando...' : 'Comprar ahora' }}
+          </button>
+          <button
+            class="flex-1 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            :disabled="product.stock <= 0 || adding || buyingNow"
             @click="onAddToCart"
           >
             <Loader2 v-if="adding" class="w-5 h-5 animate-spin" />
@@ -98,6 +106,7 @@
             class="px-4 py-3 border-2 rounded-lg transition-colors"
             :class="inWishlist ? 'border-red-300 text-red-500 bg-red-50' : 'border-gray-200 text-gray-400 hover:border-red-300 hover:text-red-500'"
             @click="handleWishlist"
+            aria-label="Agregar a favoritos"
           >
             <Heart class="w-5 h-5" :class="inWishlist ? 'fill-current' : ''" />
           </button>
@@ -123,6 +132,9 @@
     <div class="mt-12">
       <ProductSpecs :specs="product.specs" :attribute-values="product.attribute_values" />
     </div>
+
+    <!-- Similar products -->
+    <ProductSimilarProducts :slug="product.slug" :limit="8" />
   </div>
 </template>
 
@@ -143,6 +155,7 @@ const product = ref<Product | null>(null);
 const loading = ref(true);
 const notFound = ref(false);
 const adding = ref(false);
+const buyingNow = ref(false);
 
 const conditionLabel = computed(() => {
   const map: Record<string, string> = {
@@ -168,6 +181,22 @@ async function onAddToCart() {
     } finally {
       adding.value = false;
     }
+  }
+}
+
+async function onBuyNow() {
+  if (!product.value || buyingNow.value) return;
+  buyingNow.value = true;
+  try {
+    const ok = await addToCart(product.value);
+    if (!ok) {
+      showToast("No se pudo agregar al carrito", "error");
+      return;
+    }
+    const target = isAuthenticated.value ? "/checkout" : "/login?redirect=/checkout";
+    await navigateTo(target);
+  } finally {
+    buyingNow.value = false;
   }
 }
 
