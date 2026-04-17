@@ -155,25 +155,20 @@
     <!-- Step 4: Payment method -->
     <div class="mb-8">
       <h2 class="text-lg font-semibold mb-4">4. Método de pago</h2>
-      <div class="space-y-3">
-        <label class="flex items-center gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
-               :class="paymentMethod === 'flow' ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'">
-          <input v-model="paymentMethod" type="radio" value="flow" />
+      <div v-if="gateways.length === 0" class="border rounded-lg p-4 text-center text-gray-500 text-sm">
+        No hay métodos de pago disponibles en este momento.
+      </div>
+      <div v-else class="space-y-3">
+        <label
+          v-for="gw in gateways"
+          :key="gw.slug"
+          class="flex items-center gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
+          :class="paymentMethod === gw.slug ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'"
+        >
+          <input v-model="paymentMethod" type="radio" :value="gw.slug" />
           <div class="flex-1">
-            <p class="font-medium">Tarjeta (Flow)</p>
-            <p class="text-xs text-gray-500">
-              Webpay, tarjetas de crédito y débito vía Flow.cl
-            </p>
-          </div>
-        </label>
-        <label class="flex items-center gap-3 border rounded-lg p-4 cursor-pointer transition-colors"
-               :class="paymentMethod === 'bank_transfer' ? 'border-primary-500 bg-primary-50' : 'hover:border-gray-300'">
-          <input v-model="paymentMethod" type="radio" value="bank_transfer" />
-          <div class="flex-1">
-            <p class="font-medium">Transferencia bancaria</p>
-            <p class="text-xs text-gray-500">
-              Te mostraremos los datos al confirmar el pedido.
-            </p>
+            <p class="font-medium">{{ gw.name }}</p>
+            <p v-if="gw.description" class="text-xs text-gray-500">{{ gw.description }}</p>
           </div>
         </label>
       </div>
@@ -213,8 +208,16 @@ const { api } = useApi();
 const { items: cartItems, cartTotal } = useCart();
 const { calculate } = useShipping();
 
+interface PaymentGatewayPublic {
+  slug: string;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+}
+
 const addresses = ref<CustomerAddress[]>([]);
 const selectedAddressId = ref<number | null>(null);
+const gateways = ref<PaymentGatewayPublic[]>([]);
 const processing = ref(false);
 const error = ref("");
 
@@ -303,7 +306,7 @@ function validateRut() {
 }
 
 // Payment
-const paymentMethod = ref<"flow" | "bank_transfer">("flow");
+const paymentMethod = ref<string>("flow");
 
 const canSubmit = computed(() => {
   if (!selectedAddressId.value) return false;
@@ -319,7 +322,9 @@ const canSubmit = computed(() => {
 });
 
 const submitLabel = computed(() => {
-  return paymentMethod.value === "flow" ? "Pagar con tarjeta" : "Continuar con transferencia";
+  if (paymentMethod.value === "flow") return "Pagar con tarjeta";
+  if (paymentMethod.value === "bank_transfer") return "Continuar con transferencia";
+  return "Continuar";
 });
 
 async function submitCheckout() {
@@ -388,8 +393,15 @@ async function submitCheckout() {
 }
 
 onMounted(async () => {
-  const addrs = await api<CustomerAddress[]>("/account/addresses").catch(() => []);
+  const [addrs, gws] = await Promise.all([
+    api<CustomerAddress[]>("/account/addresses").catch(() => []),
+    api<PaymentGatewayPublic[]>("/payment-gateways/active").catch(() => []),
+  ]);
   addresses.value = addrs;
+  gateways.value = gws;
+
+  // Preselect first active gateway
+  if (gws.length > 0) paymentMethod.value = gws[0].slug;
 
   const defaultAddr = addrs.find((a) => a.is_default);
   if (defaultAddr) selectedAddressId.value = defaultAddr.id;
