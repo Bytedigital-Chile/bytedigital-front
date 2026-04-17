@@ -54,7 +54,18 @@
           <div v-else>
             <p class="text-3xl font-bold text-gray-900">{{ formatCLP(product.base_price) }}</p>
           </div>
-          <p class="text-sm text-gray-500 mt-1">Precio contado</p>
+
+          <div v-if="product.transfer_price && product.transfer_price < displayedBasePrice" class="mt-3 border-t pt-3 space-y-1">
+            <div class="flex items-baseline justify-between">
+              <span class="text-sm font-medium text-gray-700">Pago con transferencia</span>
+              <span class="text-xl font-bold text-green-600">{{ formatCLP(product.transfer_price) }}</span>
+            </div>
+            <div class="flex items-baseline justify-between text-sm text-gray-500">
+              <span>Otros medios de pago</span>
+              <span>{{ formatCLP(displayedBasePrice) }}</span>
+            </div>
+          </div>
+          <p v-else class="text-sm text-gray-500 mt-1">Precio contado</p>
         </div>
 
         <!-- Stock -->
@@ -167,6 +178,13 @@ const conditionLabel = computed(() => {
 });
 
 const inWishlist = computed(() => product.value ? isInWishlist(product.value.id) : false);
+
+const displayedBasePrice = computed(() => {
+  if (!product.value) return 0;
+  const p: any = product.value;
+  if (p.sale_price && p.sale_price < p.base_price) return p.sale_price;
+  return p.base_price;
+});
 
 async function onAddToCart() {
   if (product.value && !adding.value) {

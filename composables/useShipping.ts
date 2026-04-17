@@ -5,6 +5,8 @@ export interface ShippingQuote {
   is_deliverable: boolean;
   free_shipping_applied: boolean;
   threshold: number | null;
+  delivery_hours_min: number | null;
+  delivery_hours_max: number | null;
 }
 
 export interface RegionItem {

@@ -39,16 +39,21 @@
       >
         <span>⚠</span> No despachamos a {{ quote.comuna_name }}.
       </div>
-      <div
-        v-else-if="quote.free_shipping_applied"
-        class="text-sm font-medium text-green-600"
-      >
-        ✓ Envío gratis a {{ quote.comuna_name }}
-      </div>
-      <div v-else class="text-sm">
-        Envío a <strong>{{ quote.comuna_name }}</strong>:
-        <strong>${{ quote.price.toLocaleString("es-CL") }}</strong>
-      </div>
+      <template v-else>
+        <div
+          v-if="quote.free_shipping_applied"
+          class="text-sm font-medium text-green-600"
+        >
+          ✓ Envío gratis a {{ quote.comuna_name }}
+        </div>
+        <div v-else class="text-sm">
+          Envío a <strong>{{ quote.comuna_name }}</strong>:
+          <strong>${{ quote.price.toLocaleString("es-CL") }}</strong>
+        </div>
+        <div v-if="deliveryLabel" class="text-xs text-gray-500 mt-1">
+          Llega en <strong>{{ deliveryLabel }}</strong>
+        </div>
+      </template>
     </div>
     <p v-else class="text-xs text-gray-500">
       Selecciona tu región y comuna para calcular el costo.
@@ -136,6 +141,24 @@ async function requote() {
     quoting.value = false;
   }
 }
+
+const deliveryLabel = computed(() => {
+  if (!quote.value) return null;
+  const min = quote.value.delivery_hours_min;
+  const max = quote.value.delivery_hours_max;
+  if (min == null && max == null) return null;
+  // If both hours are multiples of 24 and big enough, render as days.
+  const renderDay = (h: number) => (h % 24 === 0 ? `${h / 24}` : `${h}h`);
+  if (min != null && max != null) {
+    if (min >= 24 && max >= 24 && min % 24 === 0 && max % 24 === 0) {
+      return `${min / 24}–${max / 24} días hábiles`;
+    }
+    return `${renderDay(min)}–${renderDay(max)} hrs.`;
+  }
+  const only = (min ?? max) as number;
+  if (only >= 24 && only % 24 === 0) return `${only / 24} días hábiles`;
+  return `${only} hrs.`;
+});
 
 // Re-quote when subtotal changes (useful on cart where items can be edited)
 watch(
