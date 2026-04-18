@@ -136,7 +136,8 @@
     <!-- Description -->
     <div v-if="product.description" class="mt-12">
       <h2 class="text-xl font-bold mb-4">Descripción</h2>
-      <p class="text-gray-700 whitespace-pre-line">{{ product.description }}</p>
+      <!-- eslint-disable-next-line vue/no-v-html -->
+      <div class="product-description text-gray-700" v-html="product.description" />
     </div>
 
     <!-- Specs -->

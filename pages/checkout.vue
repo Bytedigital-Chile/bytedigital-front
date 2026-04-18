@@ -108,10 +108,11 @@
     <div class="mb-8">
       <h2 class="text-lg font-semibold mb-4">3. Resumen del pedido</h2>
       <div class="border rounded-lg overflow-hidden">
-        <div
+        <NuxtLink
           v-for="item in cartItems"
           :key="item.product.id"
-          class="flex items-center gap-4 p-4 border-b last:border-0"
+          :to="`/producto/${item.product.slug}`"
+          class="flex items-center gap-4 p-4 border-b last:border-0 hover:bg-gray-50 transition-colors"
         >
           <img
             v-if="item.product.images?.[0]"
@@ -119,13 +120,13 @@
             class="w-12 h-12 object-contain rounded"
           />
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium truncate">{{ item.product.name }}</p>
+            <p class="text-sm font-medium truncate hover:text-primary-600">{{ item.product.name }}</p>
             <p class="text-xs text-gray-500">x{{ item.quantity }}</p>
           </div>
           <p class="text-sm font-semibold">
             {{ formatCLP((item.unit_price || item.product.sale_price || item.product.base_price) * item.quantity) }}
           </p>
-        </div>
+        </NuxtLink>
       </div>
       <div class="mt-4 space-y-2">
         <div class="flex justify-between text-sm">
