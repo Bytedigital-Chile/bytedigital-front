@@ -102,21 +102,34 @@ export function useCart() {
     }
   }
 
+  async function _findServerItemId(productId: number): Promise<number | null> {
+    // Si el item local no tiene id (p.ej. residuo de localStorage tras login),
+    // re-sincroniza con el server para recuperar los ids reales.
+    let item = items.value.find((i) => i.product.id === productId);
+    if (item?.id) return item.id;
+    await fetchServerCart();
+    item = items.value.find((i) => i.product.id === productId);
+    return item?.id ?? null;
+  }
+
   async function removeFromCart(productId: number): Promise<boolean> {
     if (isAuthenticated.value) {
-      const item = items.value.find((i) => i.product.id === productId);
-      if (item?.id) {
-        try {
-          const cart = await api<CartResponse>(`/account/cart/items/${item.id}`, {
-            method: "DELETE",
-          });
-          setCartData(cart);
-          return true;
-        } catch {
-          return false;
-        }
+      const itemId = await _findServerItemId(productId);
+      if (itemId == null) {
+        // No existe en el server — tratamos como éxito y limpiamos localmente.
+        items.value = items.value.filter((i) => i.product.id !== productId);
+        _recalc(items.value, cartTotal, cartCount);
+        return true;
       }
-      return false;
+      try {
+        const cart = await api<CartResponse>(`/account/cart/items/${itemId}`, {
+          method: "DELETE",
+        });
+        setCartData(cart);
+        return true;
+      } catch {
+        return false;
+      }
     } else {
       setItems(items.value.filter((i) => i.product.id !== productId));
       saveToStorage();
@@ -130,20 +143,18 @@ export function useCart() {
     }
 
     if (isAuthenticated.value) {
-      const item = items.value.find((i) => i.product.id === productId);
-      if (item?.id) {
-        try {
-          const cart = await api<CartResponse>(`/account/cart/items/${item.id}`, {
-            method: "PUT",
-            body: { quantity },
-          });
-          setCartData(cart);
-          return true;
-        } catch {
-          return false;
-        }
+      const itemId = await _findServerItemId(productId);
+      if (itemId == null) return false;
+      try {
+        const cart = await api<CartResponse>(`/account/cart/items/${itemId}`, {
+          method: "PUT",
+          body: { quantity },
+        });
+        setCartData(cart);
+        return true;
+      } catch {
+        return false;
       }
-      return false;
     } else {
       const item = items.value.find((i) => i.product.id === productId);
       if (item) {

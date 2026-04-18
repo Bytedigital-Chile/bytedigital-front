@@ -233,7 +233,12 @@ const checkoutButtonLabel = computed(() => {
 });
 
 const availableItemsCount = computed(() =>
-  items.value.filter((i) => i.stock_status === "available" || i.stock_status === "limited").length
+  items.value.filter(
+    (i) =>
+      !i.stock_status ||
+      i.stock_status === "available" ||
+      i.stock_status === "limited",
+  ).length,
 );
 
 function getStockMessageClass(status: string | undefined) {
