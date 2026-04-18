@@ -99,6 +99,12 @@
                 placeholder="••••••••"
               />
             </div>
+            <div class="flex justify-end">
+              <NuxtLink to="/olvide-clave" class="text-sm text-primary-600 hover:underline">
+                ¿Olvidaste tu contraseña?
+              </NuxtLink>
+            </div>
+
             <p v-if="error && !needsVerification" class="text-red-500 text-sm">{{ error }}</p>
 
             <!-- Email not verified error with resend -->
