@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import { ShoppingBag } from "lucide-vue-next";
 import type { Order } from "~/types";
-import { formatCLP } from "~/utils/format";
+import { formatCLP, parseBackendDate } from "~/utils/format";
 
 const { api } = useApi();
 
@@ -50,11 +50,10 @@ const orders = ref<any[]>([]);
 const loading = ref(true);
 
 function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("es-CL", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const d = parseBackendDate(dateStr);
+  return d
+    ? d.toLocaleDateString("es-CL", { year: "numeric", month: "short", day: "numeric" })
+    : "—";
 }
 
 function statusLabel(status: string): string {
