@@ -7,6 +7,7 @@ export interface ShippingQuote {
   threshold: number | null;
   delivery_hours_min: number | null;
   delivery_hours_max: number | null;
+  rural_surcharge_applied?: boolean;
 }
 
 export interface RegionItem {
@@ -19,6 +20,11 @@ export interface ComunaItem {
   id: number;
   name: string;
   region_id: number;
+}
+
+export interface ShippingItemInput {
+  product_id: number;
+  quantity: number;
 }
 
 export function useShipping() {
@@ -35,7 +41,14 @@ export function useShipping() {
   async function calculate(
     comunaId: number,
     subtotal: number = 0,
+    items: ShippingItemInput[] | undefined = undefined,
   ): Promise<ShippingQuote> {
+    if (items && items.length > 0) {
+      return await api<ShippingQuote>(
+        `/geography/comunas/${comunaId}/shipping-quote`,
+        { method: "POST", body: { subtotal, items } },
+      );
+    }
     return await api<ShippingQuote>(
       `/geography/comunas/${comunaId}/shipping`,
       { params: { subtotal } },

@@ -173,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ShippingQuote } from "~/composables/useShipping";
+import type { ShippingItemInput, ShippingQuote } from "~/composables/useShipping";
 
 interface CustomerAddress {
   id: number;
@@ -189,8 +189,9 @@ interface CustomerAddress {
 const props = withDefaults(
   defineProps<{
     subtotal?: number;
+    items?: ShippingItemInput[];
   }>(),
-  { subtotal: 0 },
+  { subtotal: 0, items: () => [] },
 );
 
 const emit = defineEmits<{
@@ -252,7 +253,7 @@ async function quoteAddress(address: CustomerAddress) {
       addressQuotes[address.id] = { loading: false, error: true };
       return null;
     }
-    const q = await calculate(comunaId, props.subtotal);
+    const q = await calculate(comunaId, props.subtotal, props.items);
     addressQuotes[address.id] = { loading: false, quote: q };
     return q;
   } catch {
@@ -328,7 +329,7 @@ async function requote() {
   if (!selectedComuna.value) return;
   quoting.value = true;
   try {
-    quote.value = await calculate(selectedComuna.value, props.subtotal);
+    quote.value = await calculate(selectedComuna.value, props.subtotal, props.items);
     // El manual tiene prioridad si está visible y se usó.
     emit("quote", quote.value);
   } catch {

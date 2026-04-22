@@ -111,7 +111,12 @@
       <div class="border-t pt-4">
         <!-- Shipping calculator -->
         <div class="mb-4">
-          <ProductShippingCalculator :subtotal="cartTotal" @quote="onShippingQuote" @clear="onShippingClear" />
+          <ProductShippingCalculator
+            :subtotal="cartTotal"
+            :items="shippingItems"
+            @quote="onShippingQuote"
+            @clear="onShippingClear"
+          />
         </div>
 
         <div class="flex justify-between items-center mb-2">
@@ -210,6 +215,14 @@ const { show: showToast } = useToast();
 const { isAuthenticated } = useAuth();
 
 const shippingQuote = ref<ShippingQuote | null>(null);
+
+const shippingItems = computed(() =>
+  items.value
+    .filter(
+      (i) => i.stock_status !== "out_of_stock" && i.stock_status !== "inactive",
+    )
+    .map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+);
 function onShippingQuote(q: ShippingQuote) {
   shippingQuote.value = q;
 }

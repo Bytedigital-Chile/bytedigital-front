@@ -92,7 +92,10 @@
 
         <!-- Shipping calculator -->
         <div class="my-4">
-          <ProductShippingCalculator :subtotal="product.base_price" />
+          <ProductShippingCalculator
+            :subtotal="product.sale_price || product.base_price"
+            :items="[{ product_id: product.id, quantity: 1 }]"
+          />
         </div>
 
         <!-- Buy now + Add to cart + Wishlist -->
