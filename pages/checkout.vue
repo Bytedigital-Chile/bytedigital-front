@@ -269,23 +269,26 @@ async function loadShippingForAddress(addr: CustomerAddress) {
     const region = regions.find(
       (r) => r.name.toLowerCase() === addr.region.toLowerCase(),
     );
-    if (!region) return;
-    const comunas = await api<{ id: number; name: string }[]>(
-      `/geography/regions/${region.id}/comunas`,
-    );
-    const comuna = comunas.find(
-      (c) => c.name.toLowerCase() === addr.comuna.toLowerCase(),
-    );
-    if (!comuna) return;
-    const quote = await calculate(comuna.id, cartTotal.value);
-    addrShipping.value[addr.id] = quote;
+    const comunaId = (addr as any).comuna_id
+      ?? (region
+        ? (await api<{ id: number; name: string }[]>(`/geography/regions/${region.id}/comunas`))
+            .find((c) => c.name.toLowerCase() === addr.comuna.toLowerCase())?.id
+        : undefined);
+    if (!comunaId) {
+      // Couldn't resolve the comuna → treat as NOT determinable, not deliverable (ME-13).
+      addrShipping.value[addr.id] = { is_deliverable: false, price: 0, free_shipping_applied: false } as ShippingQuote;
+      return;
+    }
+    addrShipping.value[addr.id] = await calculate(comunaId, cartTotal.value);
   } catch {
-    // silent — if calculation fails, the address shows without shipping estimate
+    // ME-13: a failed quote must NOT make the address look deliverable.
+    addrShipping.value[addr.id] = { is_deliverable: false, price: 0, free_shipping_applied: false } as ShippingQuote;
   }
 }
 
 function isAddressDeliverable(addr: CustomerAddress): boolean {
   const q = addrShipping.value[addr.id];
+  // Unknown (still loading) = allow; resolved-but-not-deliverable = block.
   return !q || q.is_deliverable;
 }
 
