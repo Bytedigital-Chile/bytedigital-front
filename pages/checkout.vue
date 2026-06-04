@@ -5,7 +5,7 @@
     <!-- Step 1: Select address -->
     <div class="mb-8">
       <h2 class="text-lg font-semibold mb-4">1. {{ isGuest ? "Tus datos y dirección" : "Dirección de envío" }}</h2>
-      <AddressInlineForm v-if="isGuest" v-model="guestForm" />
+      <CheckoutAddressInlineForm v-if="isGuest" v-model="guestForm" />
       <div v-if="!isGuest && addresses.length === 0" class="border rounded-lg p-4 text-center text-gray-500">
         <p class="mb-2">No tienes direcciones guardadas</p>
         <NuxtLink to="/mi-cuenta/direcciones" class="text-primary-600 hover:underline text-sm">
