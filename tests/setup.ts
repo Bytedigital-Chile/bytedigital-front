@@ -26,8 +26,14 @@ const stateStore = new Map<string, any>();
   },
 };
 
-// Mock useCookie (Nuxt auto-import)
-(globalThis as any).useCookie = (_name: string, _opts?: any) => ref(null);
+// Mock useCookie (Nuxt auto-import) — shared store keyed by name, like real cookies
+const cookieStore = new Map<string, any>();
+(globalThis as any).useCookie = (name: string, opts?: any) => {
+  if (!cookieStore.has(name)) {
+    cookieStore.set(name, ref(opts && typeof opts.default === "function" ? opts.default() : null));
+  }
+  return cookieStore.get(name);
+};
 
 // Mock navigateTo (Nuxt auto-import)
 (globalThis as any).navigateTo = vi.fn();
@@ -60,8 +66,9 @@ const stateStore = new Map<string, any>();
 (globalThis as any).watch = watch;
 (globalThis as any).reactive = reactive;
 
-// Reset shared state and localStorage between tests
+// Reset shared state, cookies and localStorage between tests
 beforeEach(() => {
   stateStore.clear();
+  cookieStore.clear();
   localStorage.clear();
 });

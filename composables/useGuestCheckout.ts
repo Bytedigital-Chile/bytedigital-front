@@ -1,10 +1,11 @@
-const GUEST_EMAIL_KEY = "bytedigital_guest_email";
-
-// Tracks whether the user chose "continuar como invitado" and remembers the
-// guest email so the confirmation pages can fetch the order without an account.
+// Guest-checkout state is backed by cookies (NOT useState) so it is shared
+// between SSR and the client. With useState the server rendered isGuest=false
+// while the client had it true, producing a hydration mismatch that left the
+// inline address form unrendered. Cookies also keep guest mode across reloads.
 export function useGuestCheckout() {
-  const active = useState<boolean>("guest_checkout", () => false);
-  const email = useState<string>("guest_email", () => "");
+  const opts = { maxAge: 60 * 60 * 6, sameSite: "lax" as const, path: "/" };
+  const active = useCookie<boolean>("bd_guest_checkout", { default: () => false, ...opts });
+  const email = useCookie<string>("bd_guest_email", { default: () => "", ...opts });
 
   function enable(initialEmail = "") {
     active.value = true;
@@ -13,26 +14,16 @@ export function useGuestCheckout() {
 
   function setEmail(value: string) {
     email.value = value;
-    if (import.meta.client && value) {
-      localStorage.setItem(GUEST_EMAIL_KEY, value);
-    }
   }
 
-  // Recover the email persisted at checkout (e.g. after a Flow redirect back).
+  // Email persisted at checkout, recovered by the confirmation pages.
   function restoreEmail(): string {
-    if (email.value) return email.value;
-    if (import.meta.client) {
-      const stored = localStorage.getItem(GUEST_EMAIL_KEY) || "";
-      email.value = stored;
-      return stored;
-    }
-    return "";
+    return email.value || "";
   }
 
   function reset() {
     active.value = false;
     email.value = "";
-    if (import.meta.client) localStorage.removeItem(GUEST_EMAIL_KEY);
   }
 
   return { active, email, enable, setEmail, restoreEmail, reset };
