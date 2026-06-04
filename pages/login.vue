@@ -201,6 +201,30 @@
 
           <!-- Google Sign-In -->
           <div id="google-signin-button" class="flex justify-center" />
+
+          <!-- Facebook Sign-In -->
+          <button
+            v-if="facebookAppId"
+            type="button"
+            :disabled="loading"
+            class="mt-3 w-full flex items-center justify-center gap-2 border rounded-lg py-2.5 font-medium text-sm text-[#1877F2] border-[#1877F2]/30 hover:bg-[#1877F2]/5 transition-colors disabled:opacity-50"
+            @click="handleFacebook"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.25h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07Z"/></svg>
+            Continuar con Facebook
+          </button>
+
+          <!-- Guest checkout -->
+          <div class="mt-4 pt-4 border-t text-center">
+            <button
+              type="button"
+              class="text-sm text-gray-600 hover:text-primary-600 font-medium"
+              @click="continueAsGuest"
+            >
+              Continuar como invitado →
+            </button>
+            <p class="text-xs text-gray-400 mt-1">Compra sin crear una cuenta.</p>
+          </div>
         </template>
       </div>
     </div>
@@ -211,7 +235,37 @@
 import { CheckCircle2, AlertCircle, Mail } from "lucide-vue-next";
 
 const route = useRoute();
-const { login, register, resendVerification, loginWithGoogle, isAuthenticated } = useAuth();
+const { login, register, resendVerification, loginWithGoogle, loginWithFacebook, isAuthenticated } = useAuth();
+const guest = useGuestCheckout();
+const facebookAppId = useRuntimeConfig().public.facebookAppId as string;
+
+function continueAsGuest() {
+  guest.enable();
+  const redirect = (route.query.redirect as string) || "/checkout";
+  navigateTo(redirect);
+}
+
+function handleFacebook() {
+  const FB = (window as any).FB;
+  if (!FB) {
+    error.value = "Facebook no está disponible en este momento.";
+    return;
+  }
+  FB.login(
+    (response: any) => {
+      if (response.authResponse?.accessToken) {
+        loading.value = true;
+        error.value = "";
+        loginWithFacebook(response.authResponse.accessToken)
+          .catch((e: any) => {
+            error.value = e.data?.detail?.message || e.data?.detail || "Error con Facebook";
+          })
+          .finally(() => { loading.value = false; });
+      }
+    },
+    { scope: "email,public_profile" },
+  );
+}
 
 const activeTab = ref<"login" | "register">(
   route.query.verified === "true" ? "login" : "login",
@@ -316,6 +370,23 @@ async function handleResendFromLogin() {
     resendLoading.value = false;
   }
 }
+
+// Facebook SDK initialization (init once the async sdk.js has loaded)
+function initFacebook() {
+  const FB = (window as any).FB;
+  if (!facebookAppId || !FB) return;
+  FB.init({ appId: facebookAppId, cookie: true, xfbml: false, version: "v19.0" });
+}
+onMounted(() => {
+  if ((window as any).FB) {
+    initFacebook();
+  } else {
+    const t = setInterval(() => {
+      if ((window as any).FB) { clearInterval(t); initFacebook(); }
+    }, 100);
+    setTimeout(() => clearInterval(t), 5000);
+  }
+});
 
 // Google Sign-In initialization
 onMounted(() => {

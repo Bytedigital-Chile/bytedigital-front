@@ -55,6 +55,15 @@ export function useAuth() {
     await fetchUser();
   }
 
+  async function loginWithFacebook(accessToken: string) {
+    const data = await api<{ access_token: string }>("/customer-auth/facebook", {
+      method: "POST",
+      body: { access_token: accessToken },
+    });
+    token.value = data.access_token;
+    await fetchUser();
+  }
+
   async function fetchUser() {
     if (!token.value) return;
     try {
@@ -82,5 +91,5 @@ export function useAuth() {
     fetchUser();
   }
 
-  return { token, user, isAuthenticated, login, register, resendVerification, loginWithGoogle, fetchUser, logout };
+  return { token, user, isAuthenticated, login, register, resendVerification, loginWithGoogle, loginWithFacebook, fetchUser, logout };
 }

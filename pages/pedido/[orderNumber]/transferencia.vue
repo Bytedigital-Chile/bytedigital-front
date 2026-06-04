@@ -72,8 +72,6 @@
 <script setup lang="ts">
 import { formatCLP } from "~/utils/format";
 
-definePageMeta({ middleware: "auth" });
-
 interface OrderDetail {
   id: number;
   order_number: string;
@@ -85,6 +83,8 @@ interface OrderDetail {
 
 const route = useRoute();
 const { api } = useApi();
+const { isAuthenticated } = useAuth();
+const guest = useGuestCheckout();
 
 const pending = ref(true);
 const order = ref<OrderDetail | null>(null);
@@ -101,10 +101,16 @@ const bankInfoLines = computed<string[]>(() => {
 });
 
 onMounted(async () => {
+  const num = route.params.orderNumber as string;
   try {
-    order.value = await api<OrderDetail>(
-      `/account/orders/${route.params.orderNumber}`,
-    );
+    if (isAuthenticated.value) {
+      order.value = await api<OrderDetail>(`/account/orders/${num}`);
+    } else {
+      const email = guest.restoreEmail();
+      order.value = await api<OrderDetail>(`/account/orders/guest/${num}`, {
+        query: { email },
+      });
+    }
   } catch {
     order.value = null;
   } finally {

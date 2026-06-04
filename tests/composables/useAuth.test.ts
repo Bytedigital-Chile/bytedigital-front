@@ -21,6 +21,7 @@ describe("useAuth — cart sync on login", () => {
       apiCalls.push({ url, opts });
       if (url === "/customer-auth/login") return { access_token: "tok" };
       if (url === "/customer-auth/google") return { access_token: "tok" };
+      if (url === "/customer-auth/facebook") return { access_token: "tok" };
       if (url === "/customer-auth/me") {
         return { id: 1, email: "a@b.cl", first_name: "A", last_name: "B" };
       }
@@ -63,5 +64,19 @@ describe("useAuth — cart sync on login", () => {
     const merge = apiCalls.find((c) => c.url === "/account/cart/merge");
     expect(merge).toBeTruthy();
     expect(merge!.opts.body).toEqual([{ product_id: 9, quantity: 1 }]);
+  });
+
+  it("merges the localStorage cart into the server cart after Facebook login", async () => {
+    localStorage.setItem(
+      CART_KEY,
+      JSON.stringify([{ product: { id: 11 }, quantity: 3 }]),
+    );
+
+    const { loginWithFacebook } = useAuth();
+    await loginWithFacebook("fb-access-token");
+
+    const merge = apiCalls.find((c) => c.url === "/account/cart/merge");
+    expect(merge).toBeTruthy();
+    expect(merge!.opts.body).toEqual([{ product_id: 11, quantity: 3 }]);
   });
 });

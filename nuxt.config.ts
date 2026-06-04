@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || "http://localhost:8000",
       googleClientId: process.env.NUXT_PUBLIC_GOOGLE_CLIENT_ID || "",
+      facebookAppId: process.env.NUXT_PUBLIC_FACEBOOK_APP_ID || "",
     },
   },
   compatibilityDate: "2025-01-01",
@@ -22,6 +23,7 @@ export default defineNuxtConfig({
       htmlAttrs: { lang: "es" },
       script: [
         { src: "https://accounts.google.com/gsi/client", async: true, defer: true },
+        { src: "https://connect.facebook.net/es_LA/sdk.js", async: true, defer: true, crossorigin: "anonymous" },
       ],
     },
   },

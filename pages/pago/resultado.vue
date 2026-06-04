@@ -14,12 +14,20 @@
       </div>
       <h1 class="text-2xl font-bold text-green-700">Pago exitoso</h1>
       <p class="text-gray-600">Tu orden ha sido confirmada</p>
+      <p v-if="orderNumber" class="text-sm text-gray-500">Pedido <strong>{{ orderNumber }}</strong></p>
       <NuxtLink
-        v-if="orderNumber"
+        v-if="orderNumber && isAuthenticated"
         :to="`/mi-cuenta/compras/${orderNumber}`"
         class="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 mt-4"
       >
         Ver mi orden
+      </NuxtLink>
+      <NuxtLink
+        v-else
+        to="/"
+        class="inline-block bg-primary-600 text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-700 mt-4"
+      >
+        Seguir comprando
       </NuxtLink>
     </div>
 
@@ -53,10 +61,24 @@ import { Check, X } from "lucide-vue-next";
 
 const route = useRoute();
 const { api } = useApi();
+const { isAuthenticated } = useAuth();
+const guest = useGuestCheckout();
 
 const orderNumber = ref(route.query.order as string || "");
 const status = ref("");
 const polling = ref(true);
+
+async function fetchStatus(): Promise<string> {
+  if (isAuthenticated.value) {
+    const data = await api<{ status: string }>(`/payments/status/${orderNumber.value}`);
+    return data.status;
+  }
+  const email = guest.restoreEmail();
+  const data = await api<{ status: string }>(`/payments/guest-status/${orderNumber.value}`, {
+    query: { email },
+  });
+  return data.status;
+}
 
 onMounted(async () => {
   if (!orderNumber.value) {
@@ -69,13 +91,13 @@ onMounted(async () => {
   const maxAttempts = 15;
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      const data = await api<{ status: string }>(`/payments/status/${orderNumber.value}`);
-      if (data.status === "paid") {
+      const s = await fetchStatus();
+      if (s === "paid") {
         status.value = "paid";
         polling.value = false;
         return;
       }
-      if (data.status === "cancelled" || data.status === "refunded") {
+      if (s === "cancelled" || s === "refunded") {
         status.value = "failed";
         polling.value = false;
         return;
@@ -88,8 +110,7 @@ onMounted(async () => {
 
   // Timeout - check one last time
   try {
-    const data = await api<{ status: string }>(`/payments/status/${orderNumber.value}`);
-    status.value = data.status === "paid" ? "paid" : "failed";
+    status.value = (await fetchStatus()) === "paid" ? "paid" : "failed";
   } catch {
     status.value = "failed";
   }

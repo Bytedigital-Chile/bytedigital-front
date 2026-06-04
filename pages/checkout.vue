@@ -4,14 +4,15 @@
 
     <!-- Step 1: Select address -->
     <div class="mb-8">
-      <h2 class="text-lg font-semibold mb-4">1. Dirección de envío</h2>
-      <div v-if="addresses.length === 0" class="border rounded-lg p-4 text-center text-gray-500">
+      <h2 class="text-lg font-semibold mb-4">1. {{ isGuest ? "Tus datos y dirección" : "Dirección de envío" }}</h2>
+      <AddressInlineForm v-if="isGuest" v-model="guestForm" />
+      <div v-if="!isGuest && addresses.length === 0" class="border rounded-lg p-4 text-center text-gray-500">
         <p class="mb-2">No tienes direcciones guardadas</p>
         <NuxtLink to="/mi-cuenta/direcciones" class="text-primary-600 hover:underline text-sm">
           Agregar una dirección
         </NuxtLink>
       </div>
-      <div v-else class="space-y-3">
+      <div v-else-if="!isGuest" class="space-y-3">
         <label
           v-for="addr in addresses"
           :key="addr.id"
@@ -201,13 +202,45 @@
 <script setup lang="ts">
 import type { CustomerAddress } from "~/types";
 import type { ShippingQuote } from "~/composables/useShipping";
+import type { GuestForm } from "~/components/checkout/AddressInlineForm.vue";
 import { formatCLP } from "~/utils/format";
 
-definePageMeta({ middleware: "auth" });
+definePageMeta({ middleware: "checkout-access" });
 
 const { api } = useApi();
 const { items: cartItems, cartTotal } = useCart();
 const { calculate } = useShipping();
+const { isAuthenticated } = useAuth();
+const guest = useGuestCheckout();
+const isGuest = computed(() => !isAuthenticated.value && guest.active.value);
+
+// Guest inline form + its shipping quote (resolved from the picked comuna_id)
+const guestForm = reactive<GuestForm>({
+  email: "",
+  name: "",
+  street: "",
+  number: "",
+  apartment: "",
+  region: "",
+  comuna_id: null,
+  phone: "",
+});
+const guestShipping = ref<ShippingQuote | null>(null);
+
+watch(
+  () => guestForm.comuna_id,
+  async (comunaId) => {
+    if (!comunaId) {
+      guestShipping.value = null;
+      return;
+    }
+    try {
+      guestShipping.value = await calculate(comunaId, cartTotal.value);
+    } catch {
+      guestShipping.value = null;
+    }
+  },
+);
 
 interface PaymentGatewayPublic {
   slug: string;
@@ -257,6 +290,7 @@ function isAddressDeliverable(addr: CustomerAddress): boolean {
 }
 
 const activeShipping = computed(() => {
+  if (isGuest.value) return guestShipping.value;
   if (!selectedAddressId.value) return null;
   return addrShipping.value[selectedAddressId.value] || null;
 });
@@ -310,7 +344,6 @@ function validateRut() {
 const paymentMethod = ref<string>("flow");
 
 const canSubmit = computed(() => {
-  if (!selectedAddressId.value) return false;
   if (cartItems.value.length === 0) return false;
   if (activeShipping.value && !activeShipping.value.is_deliverable) return false;
   if (billing.document_type === "factura") {
@@ -318,6 +351,12 @@ const canSubmit = computed(() => {
     if (!billing.rut || !billing.razon_social || !billing.giro || !billing.address) {
       return false;
     }
+  }
+  if (isGuest.value) {
+    const f = guestForm;
+    if (!f.email || !f.name || !f.street || !f.number || !f.comuna_id) return false;
+  } else if (!selectedAddressId.value) {
+    return false;
   }
   return true;
 });
@@ -337,30 +376,64 @@ async function submitCheckout() {
   processing.value = true;
   error.value = "";
 
-  try {
-    const payload: any = {
-      address_id: selectedAddressId.value,
-      billing: {
-        document_type: billing.document_type,
-        ...(billing.document_type === "factura"
-          ? {
-              rut: billing.rut,
-              razon_social: billing.razon_social,
-              giro: billing.giro,
-              address: billing.address,
-              email: billing.email || undefined,
-            }
-          : {}),
-      },
-      payment_method: paymentMethod.value,
-    };
+  const billingPayload = {
+    document_type: billing.document_type,
+    ...(billing.document_type === "factura"
+      ? {
+          rut: billing.rut,
+          razon_social: billing.razon_social,
+          giro: billing.giro,
+          address: billing.address,
+          email: billing.email || undefined,
+        }
+      : {}),
+  };
 
-    const order = await api<{
-      id: number;
-      order_number: string;
-      bank_transfer_info: Record<string, string> | null;
-      payment_method: string;
-    }>("/account/orders/checkout", { method: "POST", body: payload });
+  try {
+    let order: { order_number: string };
+
+    if (isGuest.value) {
+      const body = {
+        email: guestForm.email,
+        items: cartItems.value.map((i) => ({ product_id: i.product.id, quantity: i.quantity })),
+        shipping: {
+          name: guestForm.name,
+          street: guestForm.street,
+          number: guestForm.number,
+          apartment: guestForm.apartment || undefined,
+          region: guestForm.region,
+          comuna_id: guestForm.comuna_id,
+          phone: guestForm.phone || undefined,
+        },
+        billing: billingPayload,
+        payment_method: paymentMethod.value,
+      };
+      order = await api<{ order_number: string }>("/account/orders/guest-checkout", {
+        method: "POST",
+        body,
+      });
+      guest.setEmail(guestForm.email);
+
+      if (paymentMethod.value === "flow") {
+        const payment = await api<{ redirect_url: string }>("/payments/create-flow-guest", {
+          method: "POST",
+          body: { order_number: order.order_number, email: guestForm.email },
+        });
+        window.location.href = payment.redirect_url;
+      } else {
+        await navigateTo(`/pedido/${order.order_number}/transferencia`);
+      }
+      return;
+    }
+
+    order = await api<{ order_number: string }>("/account/orders/checkout", {
+      method: "POST",
+      body: {
+        address_id: selectedAddressId.value,
+        billing: billingPayload,
+        payment_method: paymentMethod.value,
+      },
+    });
 
     if (paymentMethod.value === "flow") {
       const payment = await api<{ redirect_url: string }>("/payments/create-flow", {
@@ -369,40 +442,45 @@ async function submitCheckout() {
       });
       window.location.href = payment.redirect_url;
     } else {
-      // Bank transfer — go to confirmation page
       await navigateTo(`/pedido/${order.order_number}/transferencia`);
     }
   } catch (e: any) {
     const detail = e.data?.detail;
     if (detail && typeof detail === "object" && detail.code) {
       if (detail.code === "comuna_not_deliverable") {
-        error.value = `Ya no despachamos a ${detail.comuna}. Elige otra dirección.`;
+        error.value = `Ya no despachamos a ${detail.comuna}. Elige otra comuna.`;
       } else if (detail.code === "rut_invalid") {
         error.value = "RUT inválido";
       } else if (detail.code === "billing_incomplete") {
         error.value = "Completa los datos de facturación";
       } else if (detail.code === "bank_transfer_not_configured") {
         error.value = "Transferencia no disponible en este momento";
+      } else if (detail.code === "cart_empty") {
+        error.value = "Tu carrito está vacío.";
       } else {
-        error.value = detail.message || "Error al procesar el pedido";
+        error.value = detail.message || "No pudimos procesar tu pedido. Intenta nuevamente.";
       }
     } else {
-      error.value = detail || "Error al procesar el pedido";
+      // Never surface raw backend strings to the user.
+      error.value = "No pudimos procesar tu pedido. Intenta nuevamente.";
     }
     processing.value = false;
   }
 }
 
 onMounted(async () => {
-  const [addrs, gws] = await Promise.all([
-    api<CustomerAddress[]>("/account/addresses").catch(() => []),
-    api<PaymentGatewayPublic[]>("/payment-gateways/active").catch(() => []),
-  ]);
-  addresses.value = addrs;
+  const gws = await api<PaymentGatewayPublic[]>("/payment-gateways/active").catch(() => []);
   gateways.value = gws;
-
-  // Preselect first active gateway
   if (gws.length > 0) paymentMethod.value = gws[0].slug;
+
+  // Guests have no saved addresses — they fill the inline form instead.
+  if (isGuest.value) {
+    if (guest.email.value) guestForm.email = guest.email.value;
+    return;
+  }
+
+  const addrs = await api<CustomerAddress[]>("/account/addresses").catch(() => []);
+  addresses.value = addrs;
 
   const defaultAddr = addrs.find((a) => a.is_default);
   if (defaultAddr) selectedAddressId.value = defaultAddr.id;
