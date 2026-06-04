@@ -188,7 +188,9 @@ async function fetchAddresses() {
 async function saveAddress() {
   saving.value = true;
   try {
-    const body = { ...form, apartment: form.apartment || undefined, recipient_name: form.recipient_name || undefined };
+    // Send the canonical comuna_id (AL-12) so checkout doesn't rely on name matching.
+    const comuna_id = comunas.value.find((c) => c.name === form.comuna)?.id ?? null;
+    const body = { ...form, comuna_id, apartment: form.apartment || undefined, recipient_name: form.recipient_name || undefined };
     if (editing.value) {
       await api(`/account/addresses/${editing.value}`, { method: "PUT", body });
     } else {

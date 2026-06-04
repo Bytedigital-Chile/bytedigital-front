@@ -106,9 +106,9 @@ onMounted(async () => {
     if (isAuthenticated.value) {
       order.value = await api<OrderDetail>(`/account/orders/${num}`);
     } else {
-      const email = guest.restoreEmail();
+      const token = guest.restoreToken();
       order.value = await api<OrderDetail>(`/account/orders/guest/${num}`, {
-        query: { email },
+        query: { token },
       });
     }
   } catch {

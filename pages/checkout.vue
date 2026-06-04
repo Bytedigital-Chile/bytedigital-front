@@ -390,7 +390,7 @@ async function submitCheckout() {
   };
 
   try {
-    let order: { order_number: string };
+    let order: { order_number: string; guest_token?: string };
 
     if (isGuest.value) {
       const body = {
@@ -408,16 +408,17 @@ async function submitCheckout() {
         billing: billingPayload,
         payment_method: paymentMethod.value,
       };
-      order = await api<{ order_number: string }>("/account/orders/guest-checkout", {
+      order = await api<{ order_number: string; guest_token?: string }>("/account/orders/guest-checkout", {
         method: "POST",
         body,
       });
       guest.setEmail(guestForm.email);
+      if (order.guest_token) guest.setToken(order.guest_token);
 
       if (paymentMethod.value === "flow") {
         const payment = await api<{ redirect_url: string }>("/payments/create-flow-guest", {
           method: "POST",
-          body: { order_number: order.order_number, email: guestForm.email },
+          body: { order_number: order.order_number, token: order.guest_token },
         });
         window.location.href = payment.redirect_url;
       } else {

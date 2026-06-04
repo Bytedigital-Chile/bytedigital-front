@@ -73,9 +73,9 @@ async function fetchStatus(): Promise<string> {
     const data = await api<{ status: string }>(`/payments/status/${orderNumber.value}`);
     return data.status;
   }
-  const email = guest.restoreEmail();
+  const token = guest.restoreToken();
   const data = await api<{ status: string }>(`/payments/guest-status/${orderNumber.value}`, {
-    query: { email },
+    query: { token },
   });
   return data.status;
 }
