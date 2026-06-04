@@ -2,7 +2,11 @@ import type { CustomerUser } from "~/types";
 import { useCart } from "~/composables/useCart";
 
 export function useAuth() {
-  const token = useCookie("customer_token", { maxAge: 60 * 60 * 8 });
+  const token = useCookie("customer_token", {
+    maxAge: 60 * 60 * 8,
+    secure: !import.meta.dev,
+    sameSite: "lax",
+  });
   const user = useState<CustomerUser | null>("customer_user", () => null);
 
   const { api } = useApi();

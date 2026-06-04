@@ -1,6 +1,10 @@
 export function useApi() {
   const config = useRuntimeConfig();
-  const token = useCookie("customer_token", { maxAge: 60 * 60 * 8 });
+  const token = useCookie("customer_token", {
+    maxAge: 60 * 60 * 8,
+    secure: !import.meta.dev,
+    sameSite: "lax",
+  });
 
   const baseURL = import.meta.server
     ? (config.apiBase as string)

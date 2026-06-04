@@ -239,10 +239,16 @@ const { login, register, resendVerification, loginWithGoogle, loginWithFacebook,
 const guest = useGuestCheckout();
 const facebookAppId = useRuntimeConfig().public.facebookAppId as string;
 
+// AL-9: only allow internal relative redirects (no open redirect to evil.tld).
+function safeRedirect(target: unknown, fallback: string): string {
+  const t = typeof target === "string" ? target : "";
+  if (t.startsWith("/") && !t.startsWith("//")) return t;
+  return fallback;
+}
+
 function continueAsGuest() {
   guest.enable();
-  const redirect = (route.query.redirect as string) || "/checkout";
-  navigateTo(redirect);
+  navigateTo(safeRedirect(route.query.redirect, "/checkout"), { external: false });
 }
 
 function handleFacebook() {
@@ -291,8 +297,7 @@ const registerForm = reactive({
 // Redirect if already authenticated
 watch(isAuthenticated, (val) => {
   if (val) {
-    const redirect = (route.query.redirect as string) || "/";
-    navigateTo(redirect);
+    navigateTo(safeRedirect(route.query.redirect, "/"), { external: false });
   }
 }, { immediate: true });
 
