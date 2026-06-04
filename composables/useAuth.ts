@@ -1,4 +1,5 @@
 import type { CustomerUser } from "~/types";
+import { useCart } from "~/composables/useCart";
 
 export function useAuth() {
   const token = useCookie("customer_token", { maxAge: 60 * 60 * 8 });
@@ -60,6 +61,10 @@ export function useAuth() {
       user.value = await api<CustomerUser>("/customer-auth/me", {
         headers: { Authorization: `Bearer ${token.value}` },
       });
+      // Session just established (login, social login, or restore): push any
+      // anonymous localStorage cart into the server-side cart. Without this the
+      // server cart stays empty and checkout fails with "Cart is empty".
+      await useCart().mergeCart();
     } catch {
       token.value = null;
       user.value = null;
