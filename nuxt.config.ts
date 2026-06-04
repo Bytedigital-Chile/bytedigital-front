@@ -21,10 +21,29 @@ export default defineNuxtConfig({
         { name: "description", content: "Tienda de tecnología y computación en Chile" },
       ],
       htmlAttrs: { lang: "es" },
-      script: [
-        { src: "https://accounts.google.com/gsi/client", async: true, defer: true },
-        { src: "https://connect.facebook.net/es_LA/sdk.js", async: true, defer: true, crossorigin: "anonymous" },
-      ],
+      // B-6: Google/Facebook SDKs are loaded lazily only on the pages that need
+      // them (login, account security), not globally on every page.
+    },
+  },
+  // B-6: Content-Security-Policy (defense in depth vs XSS) + frame protection.
+  routeRules: {
+    "/**": {
+      headers: {
+        "Content-Security-Policy": [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' https://accounts.google.com https://connect.facebook.net",
+          "style-src 'self' 'unsafe-inline'",
+          "img-src 'self' data: https:",
+          "font-src 'self' data:",
+          "connect-src 'self' https://api.bytedigital.cl https://accounts.google.com https://graph.facebook.com",
+          "frame-src https://accounts.google.com https://www.facebook.com https://connect.facebook.net",
+          "frame-ancestors 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+        ].join("; "),
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+      },
     },
   },
   nitro: {

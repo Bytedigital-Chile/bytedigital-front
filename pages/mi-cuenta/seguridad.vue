@@ -202,6 +202,7 @@ function renderGoogleButton() {
 
 onMounted(() => {
   if (!googleClientId) return;
+  loadScript("https://accounts.google.com/gsi/client").catch(() => {});  // B-6: lazy
   if ((window as any).google?.accounts) {
     renderGoogleButton();
   } else {

@@ -383,14 +383,13 @@ function initFacebook() {
   FB.init({ appId: facebookAppId, cookie: true, xfbml: false, version: "v19.0" });
 }
 onMounted(() => {
-  if ((window as any).FB) {
-    initFacebook();
-  } else {
-    const t = setInterval(() => {
-      if ((window as any).FB) { clearInterval(t); initFacebook(); }
-    }, 100);
-    setTimeout(() => clearInterval(t), 5000);
-  }
+  if (!facebookAppId) return;
+  // B-6: load the FB SDK lazily here instead of globally.
+  loadScript("https://connect.facebook.net/es_LA/sdk.js", { crossorigin: "anonymous" }).catch(() => {});
+  const t = setInterval(() => {
+    if ((window as any).FB) { clearInterval(t); initFacebook(); }
+  }, 100);
+  setTimeout(() => clearInterval(t), 5000);
 });
 
 // Google Sign-In initialization
@@ -398,6 +397,7 @@ onMounted(() => {
   const config = useRuntimeConfig();
   const clientId = config.public.googleClientId as string;
   if (!clientId) return;
+  loadScript("https://accounts.google.com/gsi/client").catch(() => {});  // B-6: lazy
 
   const initGoogle = () => {
     if (!(window as any).google?.accounts) return;
