@@ -34,6 +34,17 @@
       >
         {{ loading ? "Buscando..." : "Ver mi pedido" }}
       </button>
+      <div class="text-center pt-1">
+        <button
+          type="button"
+          :disabled="resending || !email"
+          class="text-sm text-gray-500 hover:text-primary-600 disabled:opacity-50"
+          @click="resend"
+        >
+          ¿No encuentras tu código? Reenviármelo a mi correo
+        </button>
+        <p v-if="resendMsg" class="text-green-600 text-xs mt-1">{{ resendMsg }}</p>
+      </div>
     </form>
 
     <!-- Order detail -->
@@ -109,6 +120,22 @@ const email = ref((route.query.email as string) || "");
 const loading = ref(false);
 const error = ref("");
 const order = ref<OrderDetail | null>(null);
+const resending = ref(false);
+const resendMsg = ref("");
+
+async function resend() {
+  if (!email.value) return;
+  resending.value = true;
+  resendMsg.value = "";
+  try {
+    await api("/account/orders/resend-code", { method: "POST", body: { email: email.value } });
+  } catch {
+    // ignore — response is generic anyway
+  } finally {
+    resending.value = false;
+    resendMsg.value = "Si hay un pedido con ese correo, te reenviamos el código.";
+  }
+}
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending_payment: { label: "Pendiente de pago", cls: "bg-yellow-100 text-yellow-800" },

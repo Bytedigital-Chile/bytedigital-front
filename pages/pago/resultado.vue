@@ -15,6 +15,11 @@
       <h1 class="text-2xl font-bold text-green-700">Pago exitoso</h1>
       <p class="text-gray-600">Tu orden ha sido confirmada</p>
       <p v-if="orderNumber" class="text-sm text-gray-500">Pedido <strong>{{ orderNumber }}</strong></p>
+      <div v-if="trackingCode" class="bg-blue-50 border border-blue-200 rounded-lg p-3 max-w-xs mx-auto">
+        <p class="text-xs text-gray-600">Código de seguimiento</p>
+        <p class="text-lg font-bold tracking-widest text-blue-700">{{ trackingCode }}</p>
+        <p class="text-xs text-gray-500 mt-1">Consúltalo en <NuxtLink to="/seguimiento" class="text-primary-600 hover:underline">/seguimiento</NuxtLink></p>
+      </div>
       <NuxtLink
         v-if="orderNumber && isAuthenticated"
         :to="`/mi-cuenta/compras/${orderNumber}`"
@@ -67,6 +72,7 @@ const guest = useGuestCheckout();
 const orderNumber = ref(route.query.order as string || "");
 const status = ref("");
 const polling = ref(true);
+const trackingCode = computed(() => (isAuthenticated.value ? "" : guest.restoreCode()));
 
 async function fetchStatus(): Promise<string> {
   if (isAuthenticated.value) {

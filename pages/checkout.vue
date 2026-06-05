@@ -393,7 +393,7 @@ async function submitCheckout() {
   };
 
   try {
-    let order: { order_number: string; guest_token?: string };
+    let order: { order_number: string; guest_token?: string; guest_code?: string };
 
     if (isGuest.value) {
       const body = {
@@ -411,12 +411,13 @@ async function submitCheckout() {
         billing: billingPayload,
         payment_method: paymentMethod.value,
       };
-      order = await api<{ order_number: string; guest_token?: string }>("/account/orders/guest-checkout", {
+      order = await api<{ order_number: string; guest_token?: string; guest_code?: string }>("/account/orders/guest-checkout", {
         method: "POST",
         body,
       });
       guest.setEmail(guestForm.email);
       if (order.guest_token) guest.setToken(order.guest_token);
+      if (order.guest_code) guest.setCode(order.guest_code);
 
       if (paymentMethod.value === "flow") {
         const payment = await api<{ redirect_url: string }>("/payments/create-flow-guest", {

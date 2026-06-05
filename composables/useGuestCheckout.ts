@@ -9,6 +9,8 @@ export function useGuestCheckout() {
   // Unguessable access key for the order (AL-1) — confirmation pages use this,
   // not the email, to fetch/track the guest order.
   const token = useCookie<string>("bd_guest_token", { default: () => "", ...opts });
+  // Human-friendly tracking code (XXXX-XXXX), shown on the confirmation screen.
+  const code = useCookie<string>("bd_guest_code", { default: () => "", ...opts });
 
   function enable(initialEmail = "") {
     active.value = true;
@@ -27,6 +29,21 @@ export function useGuestCheckout() {
   function setToken(value: string) {
     token.value = value;
     if (import.meta.client && value) localStorage.setItem("bd_guest_token", value);
+  }
+
+  function setCode(value: string) {
+    code.value = value;
+    if (import.meta.client && value) localStorage.setItem("bd_guest_code", value);
+  }
+
+  function restoreCode(): string {
+    if (code.value) return code.value;
+    if (import.meta.client) {
+      const stored = localStorage.getItem("bd_guest_code") || "";
+      if (stored) code.value = stored;
+      return stored;
+    }
+    return "";
   }
 
   function restoreEmail(): string {
@@ -54,11 +71,13 @@ export function useGuestCheckout() {
     active.value = false;
     email.value = "";
     token.value = "";
+    code.value = "";
     if (import.meta.client) {
       localStorage.removeItem("bd_guest_email");
       localStorage.removeItem("bd_guest_token");
+      localStorage.removeItem("bd_guest_code");
     }
   }
 
-  return { active, email, token, enable, setEmail, setToken, restoreEmail, restoreToken, reset };
+  return { active, email, token, code, enable, setEmail, setToken, setCode, restoreEmail, restoreToken, restoreCode, reset };
 }

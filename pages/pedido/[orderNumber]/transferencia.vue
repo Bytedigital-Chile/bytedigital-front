@@ -20,6 +20,16 @@
         </p>
       </div>
 
+      <div v-if="trackingCode" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6 text-center">
+        <p class="text-sm text-gray-600 mb-1">Tu código de seguimiento</p>
+        <p class="text-2xl font-bold tracking-widest text-blue-700">{{ trackingCode }}</p>
+        <p class="text-xs text-gray-500 mt-1">
+          Guárdalo: con este código y tu correo puedes ver tu pedido en
+          <NuxtLink to="/seguimiento" class="text-primary-600 hover:underline">/seguimiento</NuxtLink>.
+          (También te lo enviamos por correo.)
+        </p>
+      </div>
+
       <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6">
         <h2 class="font-semibold mb-3">Datos para transferencia</h2>
         <div v-if="bankInfoLines.length" class="space-y-1 font-mono text-sm">
@@ -88,6 +98,8 @@ const guest = useGuestCheckout();
 
 const pending = ref(true);
 const order = ref<OrderDetail | null>(null);
+// Show the tracking code to guests on the confirmation screen (in case the email is delayed).
+const trackingCode = computed(() => (isAuthenticated.value ? "" : guest.restoreCode()));
 
 const bankInfoLines = computed<string[]>(() => {
   const info = order.value?.bank_transfer_info;
